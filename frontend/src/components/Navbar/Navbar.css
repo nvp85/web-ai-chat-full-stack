@@ -1,0 +1,93 @@
+nav {
+    flex-basis: 8rem;
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: flex;
+    background-color: white;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0rem 2rem;
+    box-shadow: 2px 0px 3px gray;
+    z-index: 999;
+}
+
+#desktop-nav {
+    display: flex;
+    gap: 5rem;
+    height: 100%;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: black;
+    align-self: center;
+}
+
+.nav-links a.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.nav-links>button {
+    align-self: center;
+}
+
+#chats-link {
+    display: none;
+}
+
+#mobil-nav {
+    display: none;
+}
+
+#hamburger-menu {
+        display: none;
+    }
+
+@media (max-width: 1200px) {
+    #chats-link {
+        display: inline;
+    }
+}
+
+    
+@media (max-width: 700px) {
+    #desktop-nav {
+        display: none;
+    }
+    #mobil-nav {
+        display: block;
+    }
+    #hamburger-menu {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 6rem;
+        right: 5rem;
+        height: fit-content;
+        background-color: white;
+        padding: 2rem;
+        font-size: 2rem;
+        box-shadow: 2rem 2rem 2rem lightgray;
+        border-radius: 2rem;
+    }
+
+    #hamburger-menu >* {
+        margin: 1rem;
+    }
+    #hamburger-menu >*:hover {
+        margin: 1rem;
+        background-color: aquamarine;
+    }
+    #hamburger-menu >button {
+        background-color: transparent;
+        border: none;
+        height: fit-content;
+        width: fit-content;
+        font-size: 2rem;
+    }
+}

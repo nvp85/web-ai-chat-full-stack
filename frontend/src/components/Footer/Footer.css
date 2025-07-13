@@ -1,0 +1,8 @@
+footer {
+    background-color: white;
+    box-shadow: 2px 0px 3px gray;
+    text-align: center;
+    height: 6rem;
+    flex: 6rem 0 0;
+    z-index: 999;
+}

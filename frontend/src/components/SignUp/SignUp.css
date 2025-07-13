@@ -1,0 +1,7 @@
+#signup-btn {
+    align-self: center;
+}
+
+#register-form>button:first-of-type {
+    top: 11rem;
+}

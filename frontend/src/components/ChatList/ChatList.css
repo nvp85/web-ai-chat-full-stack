@@ -1,0 +1,47 @@
+#chat-list {
+    margin-bottom: 3rem;
+}
+
+ul {
+    list-style-type: none;
+    text-align: left;
+    margin-left: 2rem;
+    padding: 0rem;
+    margin-right: auto;
+}
+
+.chat-list-item {
+    margin-left: 2rem;
+    align-self: left;
+}
+
+li>span>a {
+    margin: 0.3rem;
+    text-decoration: none;
+    color: black;
+}
+
+.chat-title {
+    text-align: left;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 70%;
+    max-width: 70%;
+}
+
+li>span>a.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+li>span>a:hover {
+    text-decoration: underline;
+}
+
+.list-title {
+    width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

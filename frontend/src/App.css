@@ -1,0 +1,167 @@
+#root {
+    height: 100vh;
+    width: 100%;
+    font-size: 1.5rem;
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100%;
+}
+
+main {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.two-column-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.two-column-container>div:first-child {
+    flex-basis: 25%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    border-right: 0.1rem solid lightgrey;
+    text-align: center;
+    height: calc(100vh - 8rem - 6rem);
+    overflow: auto;
+}
+
+.two-column-container>div:last-child {
+    flex-grow: 1;
+    text-align: center;
+    height: calc(100vh - 8rem - 6rem);
+}
+
+button {
+    margin: 0.5rem;
+    padding: 0.5rem;
+    font-size: 1.5rem;
+    color: black;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    font-size: 1.5rem;
+    position: relative;
+}
+
+.form-container {
+    max-width: 40rem;
+    margin-left: auto;
+    margin-right: 50%;
+    transform: translate(50%);
+    border-radius: 2rem;
+    background-color: white;
+    padding: 2rem;
+    box-shadow: 1px 2px 1px lightblue, -1px 2px 1px lightblue;
+    margin-top: 5%;
+}
+
+.form>input {
+    height: 3.5rem;
+    font-size: 1.5rem;
+    padding: 0 1rem;
+}
+
+.eye-btn {
+    background-color: transparent;
+    border: none;
+    width: fit-content;
+    position: absolute;
+    align-self: flex-end;
+}
+
+.red-text {
+    color: red;
+}
+
+.bold-text {
+    font-weight: bold;
+}
+
+.btn {
+    background-color: white;
+    width: 8rem;
+    border-radius: 1rem;
+    height: 4rem;
+    font-size: 1.5rem;
+    border: solid 0.1rem rgb(138, 138, 151);
+}
+
+.btn:hover {
+    background-color: aqua;
+}
+
+@media (max-width: 700px) {
+    .input-container>button {
+        display: block;
+        position: static;
+        margin-top: 1rem;
+        width: 15rem;
+        margin-left: auto;
+        margin-right: 50%;
+        transform: translate(50%);
+    }
+
+    footer {
+        display: none;
+    }
+
+    .two-column-container>div:last-child {
+        flex-grow: 1;
+        text-align: center;
+        height: calc(100vh - 8rem);
+    }
+
+    #chat-textarea {
+        min-width: 30rem;
+        min-height: 8rem;
+        max-height: 8rem;
+    }
+
+    .form-container {
+        max-width: 70%;
+        margin: 15%;
+        transform: none;
+    }
+
+}
+
+@media (max-width: 1200px) {
+    .two-column-container>div:first-child {
+        display: none;
+    }
+    #chat-title {
+        position: absolute;
+        top: 0;
+        background-color: white;
+        border-radius: 2rem;
+        border:solid 1px lightgray;
+        padding: 0.3rem;
+        display: block;
+        box-shadow: 0.5rem 0.5rem 1rem lightgray ;
+    }
+}
+
+
+.delete-btn:hover {
+    background-color: red;
+    color: white;
+}
+
+.icon-btn {
+    background-color: transparent;
+    border: none;
+}
+
+.icon-btn:hover {
+    background-color: lightgray;
+}

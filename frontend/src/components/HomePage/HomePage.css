@@ -1,0 +1,27 @@
+#right-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+#landing-pic > img {
+    height: 30vh;
+    margin-top: 5%;
+}
+
+#landing {
+    margin: 1rem;
+    color: rgb(1, 95, 129);
+}
+
+#landing a {
+    text-decoration: underline;
+    color: rgb(19, 90, 116);
+    text-decoration-thickness: 0.2rem;
+}
+
+#landing a:hover {
+    font-weight: bold;
+    color: rgb(4, 55, 74);
+}

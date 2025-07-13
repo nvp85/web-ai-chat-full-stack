@@ -1,0 +1,7 @@
+#login-btn {
+ align-self: center;
+}
+
+#login-form>button:first-of-type {
+    top: 5.5rem;
+}

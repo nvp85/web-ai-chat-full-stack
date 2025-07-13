@@ -1,0 +1,23 @@
+.message {
+    background-color: white;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 2rem;
+    max-width: 70%;
+    text-align: justify;
+}
+
+.user-message {
+    width: fit-content;
+    margin-left: auto;
+    background-color: rgb(240, 255, 248);
+    box-shadow: -2px 0px 3px rgb(195, 195, 195);
+    border-radius: 0 2rem 0 2rem;
+}
+
+.ai-message {
+    margin-right: auto;
+    width: fit-content;
+    box-shadow: 2px 0px 3px rgb(195, 195, 195);
+    border-radius: 2rem 0 2rem 0;
+}

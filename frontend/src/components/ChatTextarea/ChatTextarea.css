@@ -1,0 +1,35 @@
+#chat-textarea {
+    min-width: 50rem;
+    min-height: 8rem;
+    max-height: 8rem;
+    border: none;
+    box-shadow: 0px 2px 3px rgb(195, 195, 195);
+    resize: none;
+    border-radius: 2rem;
+    overflow-y: auto;
+    word-wrap: break-word;
+    padding: 1rem;
+    margin: 0;
+}
+
+.input-container>button {
+    position: relative;
+    top: -3rem;
+    margin: auto 0 2rem 1rem;
+    background-color: white;
+    width: 8rem;
+    border-radius: 1rem;
+    height: 4rem;
+    font-size: 1.5rem;
+    border: solid 0.1rem rgb(138, 138, 151);
+}
+
+.input-container {
+    margin: 0;
+    padding: 0;
+
+}
+
+.input-container>button:hover {
+    background-color: aquamarine;
+}

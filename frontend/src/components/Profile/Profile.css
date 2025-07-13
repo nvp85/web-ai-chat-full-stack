@@ -1,0 +1,20 @@
+#profile {
+    text-align: center;
+}
+
+table {
+    margin-left: 50%;
+    margin-right: auto;
+    transform: translate(-50%);
+    max-width: 90%;
+}
+
+th {
+    text-align: right;
+}
+
+td {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -63,6 +63,11 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>eu.fraho.spring</groupId>
+			<artifactId>security-jwt-base</artifactId>
+			<version>5.0.12</version>
+		</dependency>
 	</dependencies>
 
 	<build>

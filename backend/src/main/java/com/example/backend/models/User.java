@@ -15,7 +15,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
-    private String password;
+    private String password; // Password should be stored securely (hashed)
     private String email;
 
     public User(String username, String password, String email) {

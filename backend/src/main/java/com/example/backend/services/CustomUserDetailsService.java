@@ -27,6 +27,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         JwtUser jwtUser = new JwtUser();
+        // jwtUser is a custom implementation of UserDetails
+        // it is different from the User model and its username field maps to User.email field
         jwtUser.setUsername(user.getEmail());
         jwtUser.setPassword(user.getPassword());
         // Set authorities to one role: all authenticated users are equal and have the same role

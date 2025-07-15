@@ -24,7 +24,7 @@ public class UserController {
     public User createUser(@RequestBody User user) throws EmailAlreadyExistsException {
         if (user.getEmail() == null || user.getPassword() == null) {
             throw new IllegalArgumentException("Email and password must not be null");
-        } else if (user.getEmail().isEmpty() || user.getPassword().length() >= 8) {
+        } else if (user.getEmail().isEmpty() || user.getPassword().length() <= 8) {
             throw new IllegalArgumentException("Email and password must not be blank and password must be at least 8 characters long");
         }
         return userService.createUser(user);

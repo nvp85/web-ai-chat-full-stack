@@ -22,6 +22,11 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User user) throws EmailAlreadyExistsException {
+        if (user.getEmail() == null || user.getPassword() == null) {
+            throw new IllegalArgumentException("Email and password must not be null");
+        } else if (user.getEmail().isEmpty() || user.getPassword().length() >= 8) {
+            throw new IllegalArgumentException("Email and password must not be blank and password must be at least 8 characters long");
+        }
         return userService.createUser(user);
     }
 
@@ -34,5 +39,10 @@ public class UserController {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<String> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

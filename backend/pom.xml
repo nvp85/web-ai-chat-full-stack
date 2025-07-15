@@ -65,7 +65,7 @@
 		</dependency>
 		<dependency>
 			<groupId>eu.fraho.spring</groupId>
-			<artifactId>security-jwt-base</artifactId>
+			<artifactId>security-jwt-base-spring-boot-starter</artifactId>
 			<version>5.0.12</version>
 		</dependency>
 	</dependencies>

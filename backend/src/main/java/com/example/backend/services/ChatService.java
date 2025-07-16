@@ -24,7 +24,7 @@ public class ChatService {
         return chatRepository.findAllByUserEmail(email);
     }
 
-    @Transactional
+
     public Message createChat(Chat newChat, String firstPrompt) {
         if (chatRepository.existsById(newChat.getId())) {
             throw new IllegalArgumentException("Chat with this ID already exists");
@@ -37,6 +37,8 @@ public class ChatService {
         Message response = openAiService.getResponse(newChat.getMessages());
         newChat.addMessage(response);
         Chat chat = chatRepository.save(newChat);
+        chat.setTitle(openAiService.generateTitle(chat.getMessages()));
+        chatRepository.save(chat);
         return response;
     }
 }

@@ -17,7 +17,7 @@ public class OpenAiService {
         this.openAIClient = openAIClient;
     }
 
-    public Message getResponse(List<Message> messages) {
+    private ChatCompletionCreateParams.Builder createParamsBuilder(List<Message> messages) {
         ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
         for (Message msg : messages) {
             // enhanced switch to handle different roles
@@ -28,8 +28,20 @@ public class OpenAiService {
                 default          -> throw new IllegalArgumentException("Unknown role: " + msg.getRole());
             }
         }
-        ChatCompletionCreateParams params = b.build();
+        return b; // return the builder to add more messages if needed
+    }
+
+    public Message getResponse(List<Message> messages) {
+        ChatCompletionCreateParams params = createParamsBuilder(messages).build();
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
         return new Message(response, "assistant", null);
+    }
+
+    public String generateTitle(List<Message> messages) {
+        ChatCompletionCreateParams.Builder b = createParamsBuilder(messages);
+        b.addSystemMessage("Generate a concise title for the chat based on the user's messages.");
+        ChatCompletionCreateParams params = b.build();
+        String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
+        return response;
     }
 }

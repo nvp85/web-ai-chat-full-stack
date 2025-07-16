@@ -1,30 +1,27 @@
 package com.example.backend.services;
+
 import com.example.backend.models.Message;
 import com.openai.client.OpenAIClient;
-import com.openai.client.okhttp.OpenAIOkHttpClient;
-import com.openai.core.JsonValue;
 import com.openai.models.ChatModel;
-import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
-import com.openai.models.chat.completions.ChatCompletionMessage;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 public class OpenAiService {
     private final OpenAIClient openAIClient;
-    private final ChatModel chatModel = ChatModel.GPT_4O_MINI; // Default model, can be changed as needed
+    private final ChatModel chatModel = ChatModel.GPT_4O_MINI;
 
-    public OpenAiService() {
-        this.openAIClient = OpenAIOkHttpClient.fromEnv();
+    public OpenAiService(OpenAIClient openAIClient) {
+        this.openAIClient = openAIClient;
     }
-
 
     public Message sendMessage(List<Message> messages, String prompt) {
         ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
 
         for (Message msg : messages) {
+            // enhanced switch to handle different roles
             switch (msg.getRole()) {
                 case "developer"    -> b.addDeveloperMessage(msg.getContent());
                 case "assistant" -> b.addAssistantMessage(msg.getContent());
@@ -37,5 +34,4 @@ public class OpenAiService {
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
         return new Message(response, "assistant", null);
     }
-
 }

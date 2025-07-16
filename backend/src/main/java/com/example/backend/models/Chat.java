@@ -1,8 +1,11 @@
 package com.example.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -23,10 +26,21 @@ public class Chat {
     @JoinColumn(name = "llm_id", nullable = false)
     private LLModel llModel; // The LLM used for the chat
 
-    public Chat(User user, String title, long lastModified, LLModel llModel) {
+    @JsonIgnore
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private List<Message> messages; // List of messages in the chat
+
+    public Chat(UUID id, User user, String title, long lastModified, LLModel llModel) {
+        this.id = id;
         this.user = user;
         this.title = title;
         this.lastModified = lastModified;
         this.llModel = llModel;
+    }
+
+    public void addMessage(Message message) {
+        messages.add(message);
+        message.setChat(this); // Set the chat for the message
     }
 }

@@ -17,9 +17,8 @@ public class OpenAiService {
         this.openAIClient = openAIClient;
     }
 
-    public Message sendMessage(List<Message> messages, String prompt) {
+    public Message getResponse(List<Message> messages) {
         ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
-
         for (Message msg : messages) {
             // enhanced switch to handle different roles
             switch (msg.getRole()) {
@@ -29,7 +28,6 @@ public class OpenAiService {
                 default          -> throw new IllegalArgumentException("Unknown role: " + msg.getRole());
             }
         }
-        b.addUserMessage(prompt);
         ChatCompletionCreateParams params = b.build();
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
         return new Message(response, "assistant", null);

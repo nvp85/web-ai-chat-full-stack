@@ -3,14 +3,14 @@ package com.example.backend.models;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Entity
 @Data // Lombok will generate getters, setters, toString, equals, and hashCode methods
 @NoArgsConstructor // Lombok will generate a no-args constructor
 public class Chat {
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private int id;
+    private UUID id; // Unique identifier for the chat (comes from the frontend)
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

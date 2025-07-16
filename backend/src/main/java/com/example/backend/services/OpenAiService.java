@@ -1,0 +1,41 @@
+package com.example.backend.services;
+import com.example.backend.models.Message;
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonValue;
+import com.openai.models.ChatModel;
+import com.openai.models.chat.completions.ChatCompletion;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.chat.completions.ChatCompletionMessage;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class OpenAiService {
+    private final OpenAIClient openAIClient;
+    private final ChatModel chatModel = ChatModel.GPT_4O_MINI; // Default model, can be changed as needed
+
+    public OpenAiService() {
+        this.openAIClient = OpenAIOkHttpClient.fromEnv();
+    }
+
+
+    public Message sendMessage(List<Message> messages, String prompt) {
+        ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
+
+        for (Message msg : messages) {
+            switch (msg.getRole()) {
+                case "developer"    -> b.addDeveloperMessage(msg.getContent());
+                case "assistant" -> b.addAssistantMessage(msg.getContent());
+                case "user"      -> b.addUserMessage(msg.getContent());
+                default          -> throw new IllegalArgumentException("Unknown role: " + msg.getRole());
+            }
+        }
+        b.addUserMessage(prompt);
+        ChatCompletionCreateParams params = b.build();
+        String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
+        return new Message(response, "assistant", null);
+    }
+
+}

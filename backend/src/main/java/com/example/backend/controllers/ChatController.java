@@ -12,8 +12,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
-
+@PreAuthorize("hasRole('ROLE_USER')")
 @RestController
 @RequestMapping("/api/chats")
 public class ChatController {
@@ -25,7 +26,6 @@ public class ChatController {
         this.userService = userService;
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping
     public List<Chat> getAllChats(@AuthenticationPrincipal JwtUser jwtUser) {
         // jwtUser username is the email of the user
@@ -33,7 +33,6 @@ public class ChatController {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping
     public Message createChat(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody ChatCreationDTO chatCreationDTO) {
         // ChatCreationDTO contains the chat object and the first prompt
@@ -43,4 +42,13 @@ public class ChatController {
         return chatService.createChat(chat, chatCreationDTO.getFirstPrompt());
     }
 
+    @GetMapping("/{chatId}/messages")
+    public List<Message> getChatMessages(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
+        // validate ownership
+        Chat chat = chatService.getChatById(chatId);
+        if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
+            throw new IllegalArgumentException("You do not have permission to access this chat");
+        }
+        return chat.getMessages();
+    }
 }

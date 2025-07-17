@@ -9,6 +9,7 @@ import com.example.backend.models.Chat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ChatService {
@@ -40,5 +41,10 @@ public class ChatService {
         chat.setTitle(openAiService.generateTitle(chat.getMessages()));
         chatRepository.save(chat);
         return response;
+    }
+
+    public Chat getChatById(UUID chatId) {
+        return chatRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found with ID: " + chatId));
     }
 }

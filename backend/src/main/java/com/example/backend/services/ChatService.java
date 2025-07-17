@@ -47,4 +47,12 @@ public class ChatService {
         return chatRepository.findById(chatId)
                 .orElseThrow(() -> new IllegalArgumentException("Chat not found with ID: " + chatId));
     }
+
+    public Message addPromptAndResponse(Chat chat, Message prompt) {
+        chat.addMessage(prompt);
+        Message response = openAiService.getResponse(chat.getMessages());
+        chat.addMessage(response);
+        chatRepository.save(chat);
+        return response;
+    }
 }

@@ -46,12 +46,22 @@ public class ChatController {
         return chatService.createChat(chat, chatCreationDTO.getFirstPrompt());
     }
 
+    @GetMapping("/{chatId}")
+    public Chat getChatById(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
+        // validate ownership
+        Chat chat = chatService.getChatById(chatId);
+        if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
+            throw new AccessDeniedException("You do not have permission to access this chat");
+        }
+        return chat;
+    }
+
     @GetMapping("/{chatId}/messages")
     public List<Message> getChatMessages(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
         // validate ownership
         Chat chat = chatService.getChatById(chatId);
         if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
-            throw new IllegalArgumentException("You do not have permission to access this chat");
+            throw new AccessDeniedException("You do not have permission to access this chat");
         }
         return chat.getMessages();
     }

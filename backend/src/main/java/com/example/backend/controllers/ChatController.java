@@ -8,6 +8,7 @@ import com.example.backend.services.ChatService;
 import com.example.backend.services.UserService;
 import eu.fraho.spring.securityJwt.base.dto.JwtUser;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,7 @@ public class ChatController {
         // validate ownership
         Chat chat = chatService.getChatById(chatId);
         if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
+            // spring security will handle this exception
             throw new AccessDeniedException("You do not have permission to access this chat");
         }
         prompt.setRole("user");
@@ -69,4 +71,10 @@ public class ChatController {
         }
         return chatService.addPromptAndResponse(chat, prompt);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
 }

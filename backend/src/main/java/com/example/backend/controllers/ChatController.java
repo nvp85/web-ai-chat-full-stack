@@ -7,9 +7,11 @@ import com.example.backend.models.User;
 import com.example.backend.services.ChatService;
 import com.example.backend.services.UserService;
 import eu.fraho.spring.securityJwt.base.dto.JwtUser;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,6 +36,7 @@ public class ChatController {
 
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Message createChat(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody ChatCreationDTO chatCreationDTO) {
         // ChatCreationDTO contains the chat object and the first prompt
         User user = userService.getUserByEmail(jwtUser.getUsername());
@@ -50,5 +53,20 @@ public class ChatController {
             throw new IllegalArgumentException("You do not have permission to access this chat");
         }
         return chat.getMessages();
+    }
+
+    @PostMapping("/{chatId}/messages")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Message promptAndGetResponse(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId, @RequestBody Message prompt) {
+        // validate ownership
+        Chat chat = chatService.getChatById(chatId);
+        if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
+            throw new AccessDeniedException("You do not have permission to access this chat");
+        }
+        prompt.setRole("user");
+        if (prompt.getContent() == null || prompt.getContent().isEmpty()) {
+            throw new IllegalArgumentException("Prompt content must not be null or empty");
+        }
+        return chatService.addPromptAndResponse(chat, prompt);
     }
 }

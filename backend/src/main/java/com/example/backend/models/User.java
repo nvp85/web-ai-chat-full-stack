@@ -17,7 +17,7 @@ public class User {
     private String username;
     @JsonIgnore
     private String password; // Password is stored securely (hashed)
-    @Column(unique=true)
+    @Column(unique=true, nullable = false)
     private String email;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)

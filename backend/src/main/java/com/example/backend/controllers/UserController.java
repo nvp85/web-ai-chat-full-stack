@@ -3,9 +3,11 @@ package com.example.backend.controllers;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.models.User;
 import com.example.backend.services.UserService;
+import eu.fraho.spring.securityJwt.base.dto.JwtUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -30,8 +32,22 @@ public class UserController {
         return userService.createUser(user);
     }
 
-    @GetMapping
+    @GetMapping("/me") // get current user's data
     @PreAuthorize("hasRole('ROLE_USER')")
+    public User getUser(@AuthenticationPrincipal JwtUser jwtUser) {
+        return userService.getUserByEmail(jwtUser.getUsername());
+    }
+
+    @PutMapping("/me") // update user's profile
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateProfile(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody User newProfile) {
+        User user = userService.getUserByEmail(jwtUser.getUsername());
+        userService.updateUserProfile(user, newProfile);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ROLE_USER')") // TODO: remove this endpoint later
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }

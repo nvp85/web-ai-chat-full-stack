@@ -1,8 +1,7 @@
 package com.example.backend.services;
 
 import com.example.backend.models.Message;
-import com.example.backend.repositories.MessageRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import com.example.backend.repositories.ChatRepository;
 import com.example.backend.models.Chat;
@@ -54,5 +53,20 @@ public class ChatService {
         chat.addMessage(response);
         chatRepository.save(chat);
         return response;
+    }
+
+    // returns the chat if it belongs to the user, otherwise throws an exception
+    public Chat getChatOrThrow(UUID chatId, String email) {
+        Chat chat = getChatById(chatId);
+        if (!chat.getUser().getEmail().equals(email)) {
+            // Spring security will handle this exception
+            throw new AccessDeniedException("You do not have permission to access this chat");
+        }
+        return chat;
+    }
+
+    public Chat updateChatTitle(Chat chat, String newTitle) {
+        chat.setTitle(newTitle);
+        return chatRepository.save(chat);
     }
 }

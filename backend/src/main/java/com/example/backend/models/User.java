@@ -22,7 +22,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @OrderBy("lastModified DESC")
-    private List<Chat> chats;
+    private List<Chat> chats; // if user gets deleted, so do their chats
 
     public User(String username, String password, String email) {
         this.username = username;

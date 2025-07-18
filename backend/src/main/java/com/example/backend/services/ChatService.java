@@ -24,7 +24,7 @@ public class ChatService {
         return chatRepository.findAllByUserEmail(email);
     }
 
-
+    // creates a new chat, adds the first prompt and response to it
     public Message createChat(Chat newChat, String firstPrompt) {
         if (chatRepository.existsById(newChat.getId())) {
             throw new IllegalArgumentException("Chat with this ID already exists");

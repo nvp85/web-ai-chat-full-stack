@@ -15,6 +15,7 @@ public class Chat {
     @Id
     private UUID id; // Unique identifier for the chat (comes from the frontend)
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // The user who owns the chat
@@ -27,7 +28,7 @@ public class Chat {
     private LLModel llModel; // The LLM used for the chat
 
     @JsonIgnore
-    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.REMOVE, orphanRemoval = true) // remove the messages if the chat is deleted
     @OrderBy("id ASC")
     private List<Message> messages; // List of messages in the chat
 

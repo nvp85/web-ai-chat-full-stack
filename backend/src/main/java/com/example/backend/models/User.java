@@ -1,10 +1,7 @@
 package com.example.backend.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +15,7 @@ public class User {
     private String username;
     @JsonIgnore
     private String password; // Password should be stored securely (hashed)
+    @Column(unique=true)
     private String email;
 
     public User(String username, String password, String email) {

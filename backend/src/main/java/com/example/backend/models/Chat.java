@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +39,13 @@ public class Chat {
         this.title = title;
         this.lastModified = lastModified;
         this.llModel = llModel;
+    }
+
+    @PrePersist // on creation
+    @PreUpdate // on updates
+    public void updateLastModified() {
+        // every time the chat changes
+        this.lastModified = Instant.now().toEpochMilli();
     }
 
     public void addMessage(Message message) {

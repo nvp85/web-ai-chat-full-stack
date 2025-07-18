@@ -34,7 +34,6 @@ public class ChatController {
         return chatService.getAllChats(jwtUser.getUsername());
     }
 
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Message createChat(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody ChatCreationDTO chatCreationDTO) {
@@ -52,7 +51,7 @@ public class ChatController {
         return chatService.getChatOrThrow(chatId, jwtUser.getUsername());
     }
 
-    // I would use PATCH here but the project requirements says PUT
+    // I would use PATCH here but the project requirements say PUT
     @PutMapping("/{chatId}")
     public Chat updateChatTitle(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId, @RequestBody Chat newTitle) {
         // we need only the title from the request body Chat object
@@ -61,9 +60,16 @@ public class ChatController {
         return chatService.updateChatTitle(chat, newTitle.getTitle()); // return updated chat
     }
 
+    @DeleteMapping("/{chatId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteChat(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
+        Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
+        chatService.deleteChat(chat);
+    }
+
     @GetMapping("/{chatId}/messages")
     public List<Message> getChatMessages(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
-        // etChatOrThrow will return the chat only if it belongs to the curr user
+        // getChatOrThrow will return the chat only if it belongs to the curr user
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         return chat.getMessages();
     }
@@ -84,5 +90,4 @@ public class ChatController {
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
-
 }

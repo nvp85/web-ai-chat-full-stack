@@ -69,4 +69,8 @@ public class ChatService {
         chat.setTitle(newTitle);
         return chatRepository.save(chat);
     }
+
+    public void deleteChat(Chat chat) {
+        chatRepository.deleteById(chat.getId());
+    }
 }

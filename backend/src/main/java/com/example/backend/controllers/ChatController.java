@@ -1,9 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.DTOs.ChatCreationDTO;
-import com.example.backend.models.Chat;
-import com.example.backend.models.Message;
-import com.example.backend.models.User;
+import com.example.backend.models.*;
 import com.example.backend.services.ChatService;
 import com.example.backend.services.UserService;
 import eu.fraho.spring.securityJwt.base.dto.JwtUser;
@@ -29,6 +27,7 @@ public class ChatController {
         this.userService = userService;
     }
 
+    // Get all the chat that belong to the current user
     @GetMapping
     public List<Chat> getAllChats(@AuthenticationPrincipal JwtUser jwtUser) {
         // jwtUser username is the email of the user
@@ -46,23 +45,26 @@ public class ChatController {
         return chatService.createChat(chat, chatCreationDTO.getFirstPrompt());
     }
 
+    // Get chat by id without its messages
     @GetMapping("/{chatId}")
     public Chat getChatById(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
-        // validate ownership
-        Chat chat = chatService.getChatById(chatId);
-        if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
-            throw new AccessDeniedException("You do not have permission to access this chat");
-        }
-        return chat;
+        // validate ownership: getChatOrThrow will return the chat only if it belongs to the curr user
+        return chatService.getChatOrThrow(chatId, jwtUser.getUsername());
+    }
+
+    // I would use PATCH here but the project requirements says PUT
+    @PutMapping("/{chatId}")
+    public Chat updateChatTitle(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId, @RequestBody Chat newTitle) {
+        // we need only the title from the request body Chat object
+        // getChatOrThrow will return the chat only if it belongs to the curr user
+        Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
+        return chatService.updateChatTitle(chat, newTitle.getTitle()); // return updated chat
     }
 
     @GetMapping("/{chatId}/messages")
     public List<Message> getChatMessages(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
-        // validate ownership
-        Chat chat = chatService.getChatById(chatId);
-        if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
-            throw new AccessDeniedException("You do not have permission to access this chat");
-        }
+        // etChatOrThrow will return the chat only if it belongs to the curr user
+        Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         return chat.getMessages();
     }
 
@@ -70,11 +72,7 @@ public class ChatController {
     @ResponseStatus(HttpStatus.CREATED)
     public Message promptAndGetResponse(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId, @RequestBody Message prompt) {
         // validate ownership
-        Chat chat = chatService.getChatById(chatId);
-        if (!jwtUser.getUsername().equals(chat.getUser().getEmail())) {
-            // spring security will handle this exception
-            throw new AccessDeniedException("You do not have permission to access this chat");
-        }
+        Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         prompt.setRole("user");
         if (prompt.getContent() == null || prompt.getContent().isEmpty()) {
             throw new IllegalArgumentException("Prompt content must not be null or empty");

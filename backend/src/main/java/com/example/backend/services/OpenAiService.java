@@ -17,8 +17,9 @@ public class OpenAiService {
         this.openAIClient = openAIClient;
     }
 
-    private ChatCompletionCreateParams.Builder createParamsBuilder(List<Message> messages) {
+    private ChatCompletionCreateParams.Builder createParamsBuilder(List<Message> messages, String instruction) {
         ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
+        b.addSystemMessage(instruction);
         for (Message msg : messages) {
             // enhanced switch to handle different roles
             switch (msg.getRole()) {
@@ -32,14 +33,16 @@ public class OpenAiService {
     }
 
     public Message getResponse(List<Message> messages) {
-        ChatCompletionCreateParams params = createParamsBuilder(messages).build();
+        String instruction = "You are a helpful assistant. Be succinct - answer in 3-5 sentences.";
+        ChatCompletionCreateParams params = createParamsBuilder(messages, instruction).build();
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
         return new Message(response, "assistant", null);
     }
 
-    public String generateTitle(List<Message> messages) {
-        ChatCompletionCreateParams.Builder b = createParamsBuilder(messages);
+    public String generateTitle(String firstPrompt) {
+        ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
         b.addSystemMessage("Generate a concise title for the chat based on the user's messages.");
+        b.addUserMessage(firstPrompt);
         ChatCompletionCreateParams params = b.build();
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
         return response;

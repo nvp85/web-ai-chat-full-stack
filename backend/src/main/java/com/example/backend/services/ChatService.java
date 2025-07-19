@@ -14,10 +14,12 @@ import java.util.UUID;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final OpenAiService openAiService;
+    private final GoogleAiService googleAiService;
 
-    public ChatService(ChatRepository chatRepository, OpenAiService openAiService) {
+    public ChatService(ChatRepository chatRepository, OpenAiService openAiService, GoogleAiService googleAiService) {
         this.chatRepository = chatRepository;
         this.openAiService = openAiService;
+        this.googleAiService = googleAiService;
     }
 
     public List<Chat> getAllChats(String email) {
@@ -25,21 +27,35 @@ public class ChatService {
     }
 
     // creates a new chat, adds the first prompt and response to it
-    public Message createChat(Chat newChat, String firstPrompt) {
+    public Chat createChat(Chat newChat, String firstPrompt) {
         if (chatRepository.existsById(newChat.getId())) {
             throw new IllegalArgumentException("Chat with this ID already exists");
         }
         newChat.setMessages(new ArrayList<Message>());
-        Message systemMessage = new Message("You are a helpful assistant. Be succinct - answer in 3-5 sentences.", "developer");
-        newChat.addMessage(systemMessage);
+        // the instruction was moved to the AI services
         Message firstMessage = new Message(firstPrompt, "user");
         newChat.addMessage(firstMessage);
-        Message response = openAiService.getResponse(newChat.getMessages());
+        Message response = switch (newChat.getLlModel().getId()) {
+            case 1 -> openAiService.getResponse(newChat.getMessages());
+            case 2 -> googleAiService.getResponse(newChat.getMessages());
+            default -> throw new IllegalArgumentException("Unknown LLM");
+        };
         newChat.addMessage(response);
         Chat chat = chatRepository.save(newChat);
-        chat.setTitle(openAiService.generateTitle(chat.getMessages()));
+        String title = "Untitled";
+        try {
+            title = switch (newChat.getLlModel().getId()) {
+                case 1 -> openAiService.generateTitle(firstPrompt);
+                case 2 -> googleAiService.generateTitle(firstPrompt);
+                default -> throw new IllegalArgumentException("Unknown LLM");
+            };
+        } catch (Exception e) {
+            // title is optional
+            // if this call fails the chat just remains untitled
+        }
+        chat.setTitle(title);
         chatRepository.save(chat);
-        return response;
+        return chat;
     }
 
     public Chat getChatById(UUID chatId) {

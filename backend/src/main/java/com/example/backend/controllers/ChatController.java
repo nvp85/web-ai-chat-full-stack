@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
-import com.example.backend.DTOs.ChatCreationDTO;
+import com.example.backend.DTOs.ChatCreationRequest;
+import com.example.backend.DTOs.ChatCreationResponse;
 import com.example.backend.models.*;
 import com.example.backend.services.ChatService;
 import com.example.backend.services.UserService;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,12 +36,13 @@ public class ChatController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Message createChat(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody ChatCreationDTO chatCreationDTO) {
+    public ChatCreationResponse createChat(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody ChatCreationRequest chatCreationDTO) {
         // ChatCreationDTO contains the chat object and the first prompt
         User user = userService.getUserByEmail(jwtUser.getUsername());
-        Chat chat = chatCreationDTO.getChat();
-        chat.setUser(user);
-        return chatService.createChat(chat, chatCreationDTO.getFirstPrompt());
+        Chat newChat = chatCreationDTO.getChat();
+        newChat.setUser(user);
+        Chat chat = chatService.createChat(newChat, chatCreationDTO.getFirstPrompt());
+        return new ChatCreationResponse(chat, chat.getMessages().getLast().getContent());
     }
 
     // Get chat by id without its messages

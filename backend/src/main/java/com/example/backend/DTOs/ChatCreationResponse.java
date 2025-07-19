@@ -1,7 +1,6 @@
 package com.example.backend.DTOs;
 
 import com.example.backend.models.Chat;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatCreationDTO {
+public class ChatCreationResponse {
     private Chat chat;
-    private String firstPrompt;
-
+    private String response;
 }

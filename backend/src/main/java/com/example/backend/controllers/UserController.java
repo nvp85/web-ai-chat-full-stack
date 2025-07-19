@@ -38,7 +38,7 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public UserDTO getUser(@AuthenticationPrincipal JwtUser jwtUser) {
         User user = userService.getUserByEmail(jwtUser.getUsername());
-        return new UserDTO(user.getEmail(), user.getUsername(), user.getChats());
+        return new UserDTO(user.getUsername(), user.getEmail(), user.getChats());
     }
 
     @PutMapping("/me") // update user's profile

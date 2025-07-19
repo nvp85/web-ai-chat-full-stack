@@ -65,7 +65,11 @@ public class ChatService {
 
     public Message addPromptAndResponse(Chat chat, Message prompt) {
         chat.addMessage(prompt);
-        Message response = openAiService.getResponse(chat.getMessages());
+        Message response = switch (chat.getLlModel().getId()) {
+            case 1 -> openAiService.getResponse(chat.getMessages());
+            case 2 -> googleAiService.getResponse(chat.getMessages());
+            default -> throw new IllegalArgumentException("Unknown LLM");
+        };
         chat.addMessage(response);
         chatRepository.save(chat);
         return response;

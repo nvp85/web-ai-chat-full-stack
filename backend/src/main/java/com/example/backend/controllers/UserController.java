@@ -1,5 +1,6 @@
 package com.example.backend.controllers;
 
+import com.example.backend.DTOs.UserDTO;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.models.User;
 import com.example.backend.services.UserService;
@@ -34,8 +35,9 @@ public class UserController {
 
     @GetMapping("/me") // get current user's data
     @PreAuthorize("hasRole('ROLE_USER')")
-    public User getUser(@AuthenticationPrincipal JwtUser jwtUser) {
-        return userService.getUserByEmail(jwtUser.getUsername());
+    public UserDTO getUser(@AuthenticationPrincipal JwtUser jwtUser) {
+        User user = userService.getUserByEmail(jwtUser.getUsername());
+        return new UserDTO(user.getEmail(), user.getUsername(), user.getChats());
     }
 
     @PutMapping("/me") // update user's profile

@@ -51,7 +51,7 @@ public class UserService {
     }
 
     public boolean isEmailValid(String email) {
-        String pattern = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$\n";
+        String pattern = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         return email.matches(pattern);
     }
 }

@@ -24,13 +24,14 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) throws EmailAlreadyExistsException {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createUser(@RequestBody User user) throws EmailAlreadyExistsException {
         if (user.getEmail() == null || user.getPassword() == null) {
             throw new IllegalArgumentException("Email and password must not be null");
         } else if (user.getEmail().isEmpty() || user.getPassword().length() <= 8) {
             throw new IllegalArgumentException("Email and password must not be blank and password must be at least 8 characters long");
         }
-        return userService.createUser(user);
+        userService.createUser(user);
     }
 
     @GetMapping("/me") // get current user's data

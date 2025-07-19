@@ -29,7 +29,7 @@ public class Chat {
     private LLModel llModel; // The LLM used for the chat
 
     @JsonIgnore
-    @OneToMany(mappedBy = "chat", cascade = CascadeType.REMOVE, orphanRemoval = true) // remove the messages if the chat is deleted
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private List<Message> messages; // List of messages in the chat
 

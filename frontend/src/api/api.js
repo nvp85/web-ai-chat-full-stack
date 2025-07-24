@@ -2,28 +2,57 @@
 
 // TODO: check if the convo contains less tokens than the models context window size
 export default async function sendMessage(messages) {
-    const response = await fetch('/.netlify/functions/proxy', {
-        method: 'POST',
-        body: JSON.stringify(messages)
-      });
-    if (response.status == 500) {
-        throw new Error("API call failed.");
-    }
-    const result = await response.json();
-    return result;
+
 }
 
 export async function generateTitle(text) {
-    const prompt = [
-        {
-            role: "developer",
-            content: "Generate a title for the user's text. No more than 5 words."
-        },
-        {
-            role: "user",
-            content: text
-        }
-    ];
-    const title = await sendMessage(prompt);
-    return title;
+
 }
+
+// base url
+const base_url = "http://localhost:8080";
+
+// login user: get a token 
+// creds = {username, password}
+export async function getAuthToken(creds) {
+    const response = await fetch(base_url + "/auth/login",
+        {
+            method: "post",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(creds)
+        }
+    );
+    const data = await response.json();
+    if (response.status === 401) {
+        throw new Error("Invalid credentials.");
+    }
+    if (!response.ok) {
+        console.log(response.status)
+        throw new Error("Something went wrong.");
+    }
+    return data.accessToken.token;
+}
+
+const api_url = base_url + "/api";
+
+// fetch user's data
+export async function getUserData() {
+    const response = await fetch(api_url + "users",
+        {
+            method: "get",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('auth-token')
+            }   
+        }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error("Failed to fetch user data.");
+    }
+    return data;
+}
+
+

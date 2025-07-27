@@ -70,6 +70,26 @@ export async function createUser(newUser) {
     }
 }
 
+// update User profile
+export async function updateUser(newProfile, token) {
+    const response = await fetch(api_url + "/users/me",
+        {
+            method: "put",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify(newProfile)
+        }
+    );
+    if (response.status === 401) {
+        throw new Error("Invalid token.");
+    }
+    if (!response.ok) {
+        throw new Error("Failed to update the profile.");
+    }
+}
+
 // Chat list
 
 export async function getChatList(token) {
@@ -84,7 +104,7 @@ export async function getChatList(token) {
     );
     const data = await response.json();
     if (response.status === 401) {
-        throw new Error("Invalid token.")
+        throw new Error("Invalid token.");
     }
     if (!response.ok) {
         throw new Error("Failed to fetch user's chat list.");
@@ -145,7 +165,7 @@ export async function updateChatTitle(chatId, newTitle, token) {
                 'Content-Type': 'application/json',
                 'Authorization': token
             },
-            body: JSON.stringify({title: newTitle})
+            body: JSON.stringify({ title: newTitle })
         }
     );
     const data = await response.json();
@@ -179,8 +199,8 @@ export async function deleteChat(chatId, token) {
 }
 
 export async function getChatMessages(chatId, token) {
-        const url = `${api_url}/chats/${chatId}/messages`;
-        const response = await fetch( url,
+    const url = `${api_url}/chats/${chatId}/messages`;
+    const response = await fetch(url,
         {
             method: "get",
             headers: {
@@ -212,7 +232,7 @@ export default async function sendMessage(chatId, message, token) {
                 'Content-Type': 'application/json',
                 'Authorization': token
             },
-            body: JSON.stringify({content: message})
+            body: JSON.stringify({ content: message })
         }
     );
     const data = await response.json();
@@ -227,9 +247,19 @@ export default async function sendMessage(chatId, message, token) {
 }
 
 // LLM
-// get a list of supported LLMs
+// get a list of supported LLMs (temporarily hardcoded)
 export async function getLLMs() {
-
+    return [{
+        id: 1,
+        name: "gpt-o4-mini",
+        provider: "OpenAI",
+    },
+    {
+        id: 2,
+        name: "Gemini",
+        provider: "Google",
+    },
+    ]
 }
 
 let token = await getAuthToken({ username: "demouser@example.com", password: "qwerty" });
@@ -263,3 +293,4 @@ let token = await getAuthToken({ username: "demouser@example.com", password: "qw
 // sendMessage("0eb9e3c4-47ba-48b3-8abd-55fbf43b9cba", "What do designers do?", token).then(console.log);
 // getChatMessages("1f3afa62-7f29-4eee-b677-1fc8ec91406c", token).then(console.log);
 // sendMessage("1f3afa62-7f29-4eee-b677-1fc8ec91406c", "Tell about CBT.", token).then(console.log);
+updateUser({username: "demo user"}, token);

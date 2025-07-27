@@ -71,7 +71,7 @@ export async function createUser(newUser) {
 }
 
 // update User profile
-export async function updateUser(newProfile, token) {
+export async function updateUserProfile(newProfile, token) {
     const response = await fetch(api_url + "/users/me",
         {
             method: "put",
@@ -262,7 +262,7 @@ export async function getLLMs() {
     ]
 }
 
-let token = await getAuthToken({ username: "demouser@example.com", password: "qwerty" });
+
 
 
 // let testUser = {
@@ -293,4 +293,3 @@ let token = await getAuthToken({ username: "demouser@example.com", password: "qw
 // sendMessage("0eb9e3c4-47ba-48b3-8abd-55fbf43b9cba", "What do designers do?", token).then(console.log);
 // getChatMessages("1f3afa62-7f29-4eee-b677-1fc8ec91406c", token).then(console.log);
 // sendMessage("1f3afa62-7f29-4eee-b677-1fc8ec91406c", "Tell about CBT.", token).then(console.log);
-updateUser({username: "demo user"}, token);

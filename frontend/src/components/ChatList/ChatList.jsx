@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, NavLink } from 'react-router';
-import './ChatList.css';
-import { useUser } from '../../hooks/useUser';
+import { useNavigate } from 'react-router';
+import { useAuth } from '../../hooks/useAuth';
 import ChatListItem from '../ChatListItem/ChatListItem';
 import Modal from '../Modal/Modal';
 import { useChatList } from '../../hooks/useChatList';
+import { updateChatTitle, deleteChat, getChatById } from "../../api/api";
 
 
 export default function ChatList({ currentChatId = null }) {
@@ -12,8 +12,8 @@ export default function ChatList({ currentChatId = null }) {
     // handles renaming and deletion of a chat
     // chat is an object that has a title, id, userId, and lastModified properties
     // chats is an array of objects 
-    const { currentUser } = useUser();
-    const {chats, setChats, deleteChat} = useChatList();
+    const { currentUser, token } = useAuth();
+    const {chats, setChats, fetchChats} = useChatList();
     const displayedChats = chats.toSorted((a, b) => b.lastModified - a.lastModified);
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,13 +21,10 @@ export default function ChatList({ currentChatId = null }) {
     const [currChat, setCurrChat] = useState(null);
     const [error, setError] = useState("");
 
-    function handleDelete(id) { 
+    async function handleDelete(id) { 
         try {
-            if (currentChatId == id) {
-                navigate("/");
-            } 
-            // a little delay to give it some time to unmount if it's the current chat
-            setTimeout(() => deleteChat(id), 100);
+            await deleteChat(id, token);
+            setChats(prev => [...prev.filter(chat => chat.id != id)]);
         } catch {
             setError("Failed to delete the chat.");
         } finally {
@@ -35,17 +32,16 @@ export default function ChatList({ currentChatId = null }) {
         }
     }
 
-    function rename(id, title) {
+    async function rename(id, title) {
         title = title.trim();
         if (!title) {
             setError("Title should not be empty.");
             return;
         }
         try {
-            const chat = {...chats.find(chat => chat.id == id)};
-            chat.title = title;
-            chat.lastModified = Date.now();
+            const chat = await updateChatTitle(id, title, token);
             setChats(prev => [...prev.filter(chat => chat.id != id), chat]); 
+
         } catch {
             setError("Failed to rename the chat.");
         }

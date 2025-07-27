@@ -4,30 +4,29 @@ import { Link, useNavigate, useParams, useLocation } from 'react-router';
 import MessageBubble from "../MessageBubble/MessageBubble";
 import ChatTextarea from "../ChatTextarea/ChatTextarea";
 import './ChatPage.css';
-import messagesData from '../../assets/messages.json'
-import { useUser } from '../../hooks/useUser';
-import useSyncLocalstorage from '../../hooks/useSyncLocalstorage';
+import { useAuth } from '../../hooks/useAuth';
 import sendMessage from "../../api/api";
 import { PiSpinnerGap } from "react-icons/pi";
 import Modal from '../Modal/Modal';
 import NotFound from "../NotFound";
 import { useChatList } from "../../hooks/useChatList";
-import { generateTitle } from "../../api/api";
+import { startChat } from "../../api/api";
 
 // displays a side bar with the chat list and an individual chat on the right
 // manages the chat
 export default function ChatPage() {
-	const { currentUser } = useUser();
+	const { token } = useAuth();
 	const { chats, setChats } = useChatList();
+	const firstMessage = location.state?.firstMessage ? {content: location.state?.firstMessage, role: "user"} : null;
 	const location = useLocation();
 	const [loading, setLoading] = useState(location.state?.firstMessage ? true : false);
 	const [error, setError] = useState("");
 	const chatBottom = useRef();
-	let needsTitle = location.state?.firstMessage ? true : false;
+
 	// extracts uuid of the chat
 	const { id } = useParams();
-	// fetch chats messages from the local storage
-	const [messages, setMessages, removeMessages] = useSyncLocalstorage(id, messagesData[id] || []);
+
+	const [messages, setMessages] = useState(firstMessage ? [firstMessage] : null);
 
 	let chat = null;
 	try {
@@ -39,11 +38,19 @@ export default function ChatPage() {
 		return <NotFound />
 	}
 
-	useEffect(() => {
-		if (location.state?.firstMessage &&
-			messages.at(-1).role === "developer") {
+	useEffect(async () => {
+		if (location.state?.firstMessage && messages === null) {
+			let newChat = {
+				chat: {
+					id: id,
+					llModel: {id: 1}
+				},
+				firstPrompt: firstMessage
+			}
 			try {
-				handleSubmit(location.state.firstMessage);
+				newChat = await startChat(newChat, token);
+				setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]); 
+				setMessages(prev => [...prev, newChat.response]);
 			} catch {
 				setError("Something went wrong. Failed to start the chat.");
 				setLoading(false);
@@ -51,23 +58,10 @@ export default function ChatPage() {
 				window.history.replaceState({}, '');
 			}
 		}
-	}, [id]);
-
-	useEffect(() => {
-		if (needsTitle) {
-			try {
-				generateTitle(location.state?.firstMessage).then((title) => {
-					setChats(prev => [...prev.filter(chat => chat.id != id), { ...chat, title: title }]);
-				});
-			} catch {
-				// if it fails it fails.
-			} finally {
-				needsTitle = false;
-			}
-		};
 	}, []);
 
-	if (messages.length && messages.at(-1).role === "assistant" && loading) {
+
+	if (messages.length && ["assistant", "model"].includes(messages.at(-1).role) && loading) {
 		setLoading(false);
 	}
 
@@ -76,24 +70,17 @@ export default function ChatPage() {
 			setError("Your message should not be empty.");
 			return;
 		}
-		const convo = [
-			...messages,
-			{
+		const newMessage = {
 				role: "user",
 				content: userInput,
-			}
-		];
+			};
 		try {
-			setMessages(convo);
-			setChats(prev => [...prev.filter(chat => chat.id != id), { ...chat, lastModified: Date.now() }]);
+			setMessages(prev => [...prev, newMessage]);
 			setLoading(true);
-			const response = await sendMessage(convo);
-			setMessages([
-				...convo,
-				{
-					role: "assistant",
-					content: response
-				}
+			const response = await sendMessage(id, newMessage, token);
+			setMessages(prev => [
+				...prev,
+				response
 			]);
 		} catch {
 			setError("Something went wrong. Response wasn't generated.");

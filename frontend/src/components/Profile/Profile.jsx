@@ -1,15 +1,15 @@
 import './Profile.css';
 import { useState } from 'react';
-import { useUser } from '../../hooks/useUser';
 import ProfileTableRow from './ProfileTableRow';
 import ErrorModal from '../Modal/ErrorModal';
 import { isUsernameValid, isEmailValid } from '../../utils/utils';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function Profile() {
-    const { currentUser, saveUser } = useUser();
+    const { currentUser, updateUser } = useAuth();
     const [errors, setErrors] = useState([]);
 
-    function saveChanges(field, newValue) {
+    async function saveChanges(field, newValue) {
         const errors = [];
         if (field === "name") {
             errors.push(...isUsernameValid(newValue));
@@ -21,7 +21,7 @@ export default function Profile() {
             return;
         }
         try {
-            saveUser({ ...currentUser, [field]: newValue });
+            await updateUser({ ...currentUser, [field]: newValue });
         } catch {
             setErrors(["Something went wrong. Failed to save the changes."])
         }

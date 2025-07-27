@@ -1,12 +1,12 @@
 import { NavLink, useNavigate } from "react-router";
 import './Navbar.css'
 import { useState, useEffect, useRef } from "react";
-import { useUser } from '../../hooks/useUser';
+import { useAuth } from '../../hooks/useAuth';
 import { IoHomeOutline } from "react-icons/io5";
 import Hamburger from 'hamburger-react';
 
 export default function Navbar() {
-    const user = useUser();
+    const user = useAuth();
     const isAuthenticated = user.currentUser ? true : false;
     const [isMenuOpen, setIsMenuOpen] = useState();
     const menuRef = useRef();

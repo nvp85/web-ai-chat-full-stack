@@ -3,8 +3,8 @@ import './SignUp.css';
 import { useState } from "react";
 import { useNavigate } from 'react-router';
 import { LuEye, LuEyeOff } from "react-icons/lu";
-import { useUser } from '../../hooks/useUser';
 import { isPasswordValid, isEmailValid, isUsernameValid } from '../../utils/utils';
+import { useAuth } from '../../hooks/useAuth';
 
 
 export default function SignUp() {
@@ -16,7 +16,7 @@ export default function SignUp() {
     const [formErrors, setFormErrors] = useState([]);
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const manageUser = useUser();
+    const manageUser = useAuth();
 
     // validate the form
     // when a user is created - just save it into the local storage

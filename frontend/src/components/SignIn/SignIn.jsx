@@ -2,16 +2,16 @@ import { Link, useNavigate, Navigate } from 'react-router';
 import { useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import './SignIn.css';
-import { useUser } from '../../hooks/useUser';
 import { isEmailValid } from '../../utils/utils';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function SignIn() {
     const [formData, setFormData] = useState({
-        email: "demoUser@example.com", 
-        password: "qwerty123"
+        email: "demouser@example.com", 
+        password: "qwerty"
     });
     const [showPassword, setShowPassword] = useState(false);
-    const manageUser = useUser();
+    const manageUser = useAuth();
     const [error, setError] = useState("");
     const navigate = useNavigate();
 

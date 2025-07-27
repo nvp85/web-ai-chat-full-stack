@@ -1,20 +1,22 @@
 import { useState, createContext, useEffect, useContext } from "react";
-import { useUser } from '../hooks/useUser';
+import { useAuth } from '../hooks/useAuth';
+import { getChatList, updateChatTitle, deleteChat, getChatById } from "../api/api";
 
 
 export const ChatListContext = createContext();
 
 export default function ChatListProvider({ children }) {
-    const { currentUser } = useUser();
-    const [chats, setChats] = useState(JSON.parse(localStorage.getItem("chats")) || null);
+    const { currentUser, initialChats, token } = useAuth();
+    const [chats, setChats] = useState(initialChats || null);
 
-    // simulating a call to a backend API to fetch the user's chats
-    function fetchChats() {
-        const storedChats = localStorage.getItem("chats");
-        if (!storedChats) {
-            throw new Error("Something went wrong.");
+
+    async function fetchChats() {
+        try {
+            const chatData = await getChatList(token);
+            setChats(chatData);
+        } catch {
+// error handling
         }
-        setChats(JSON.parse(storedChats));
     }
 
     useEffect(() => {
@@ -22,20 +24,11 @@ export default function ChatListProvider({ children }) {
             return;
         }
         fetchChats();
-    }, [currentUser]);
+    }, [token]);
 
-    // simulating a call to a backend API to save/update the user's chats
-    useEffect(() => {
-        localStorage.setItem("chats", JSON.stringify(chats));
-    }, [chats]);
-
-    function deleteChat(id) {
-        setChats(prev => prev.filter(chat => chat.id != id));
-        localStorage.removeItem(id);
-    }
 
     return (
-        <ChatListContext value={{ chats, setChats, deleteChat }}>
+        <ChatListContext value={{ chats, setChats, fetchChats }}>
             {children}
         </ChatListContext>
     )

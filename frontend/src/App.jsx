@@ -8,7 +8,7 @@ import Profile from "./components/Profile/Profile";
 import './App.css';
 import AboutPage from "./components/AboutPage/AboutPage";
 import ChatList from "./components/ChatList/ChatList";
-import UserProvider from "./contextProviders/UserProvider";
+import AuthProvider from "./contextProviders/AuthProvider";
 import ProtectedRoutes from "./components/ProtectedRoutes/ProtectedRoutes";
 import NotFound from "./components/NotFound";
 import ChatListProvider from './contextProviders/ChatListProvider';
@@ -16,7 +16,7 @@ import ChatListProvider from './contextProviders/ChatListProvider';
 
 function App() {
     return (
-        <UserProvider>
+        <AuthProvider>
             <ChatListProvider>
                 <BrowserRouter>
                     <Routes>
@@ -36,7 +36,7 @@ function App() {
                     </Routes>
                 </BrowserRouter>
             </ChatListProvider>
-        </UserProvider>
+        </AuthProvider>
 
     )
 

@@ -10,59 +10,80 @@ import { PiSpinnerGap } from "react-icons/pi";
 import Modal from '../Modal/Modal';
 import NotFound from "../NotFound";
 import { useChatList } from "../../hooks/useChatList";
-import { startChat } from "../../api/api";
+import { startChat, getChatMessages } from "../../api/api";
 
 // displays a side bar with the chat list and an individual chat on the right
 // manages the chat
 export default function ChatPage() {
 	const { token } = useAuth();
 	const { chats, setChats } = useChatList();
-	const firstMessage = location.state?.firstMessage ? {content: location.state?.firstMessage, role: "user"} : null;
 	const location = useLocation();
-	const [loading, setLoading] = useState(location.state?.firstMessage ? true : false);
+	const firstMessage = location.state?.firstMessage ? { content: location.state?.firstMessage, role: "user" } : null;
+	const [generating, setGenerating] = useState(location.state?.firstMessage ? true : false);
 	const [error, setError] = useState("");
 	const chatBottom = useRef();
+	const [ loading, setLoading ] = useState(true);
 
 	// extracts uuid of the chat
 	const { id } = useParams();
 
 	const [messages, setMessages] = useState(firstMessage ? [firstMessage] : null);
-
+	console.log(chats);
 	let chat = null;
 	try {
 		chat = chats.find(chat => chat.id == id);
-		if (!chat || currentUser.id != chat.userId) {
+		console.log(chat);
+		if (!chat) {
 			throw new Error("No chat was found.");
 		}
 	} catch {
 		return <NotFound />
 	}
 
-	useEffect(async () => {
-		if (location.state?.firstMessage && messages === null) {
-			let newChat = {
-				chat: {
-					id: id,
-					llModel: {id: 1}
-				},
-				firstPrompt: firstMessage
-			}
+	useEffect(() => {
+		async function fetchMessages() {
+			setLoading(true);
 			try {
-				newChat = await startChat(newChat, token);
-				setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]); 
-				setMessages(prev => [...prev, newChat.response]);
-			} catch {
-				setError("Something went wrong. Failed to start the chat.");
-				setLoading(false);
+				const messagesData = await getChatMessages(id, token);
+				setMessages(messagesData);
+			} catch(err) {
+				console.log(err);
 			} finally {
-				window.history.replaceState({}, '');
+				setLoading(false);
 			}
 		}
+		fetchMessages();
+	}, [id]);
+
+
+	useEffect(() => {
+		(async function () {
+			if (location.state?.firstMessage && messages === null) {
+				let newChat = {
+					chat: {
+						id: id,
+						llModel: { id: 1 }
+					},
+					firstPrompt: firstMessage
+				}
+				try {
+					newChat = await startChat(newChat, token);
+					setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]);
+					setMessages(prev => [...prev, newChat.response]);
+				} catch {
+					setError("Something went wrong. Failed to start the chat.");
+					setGenerating(false);
+				} finally {
+					window.history.replaceState({}, '');
+				}
+			}
+		})();
+
 	}, []);
 
 
-	if (messages.length && ["assistant", "model"].includes(messages.at(-1).role) && loading) {
-		setLoading(false);
+	if (messages?.length && ["assistant", "model"].includes(messages.at(-1).role) && generating) {
+		setGenerating(false);
 	}
 
 	async function handleSubmit(userInput) {
@@ -71,13 +92,13 @@ export default function ChatPage() {
 			return;
 		}
 		const newMessage = {
-				role: "user",
-				content: userInput,
-			};
+			role: "user",
+			content: userInput,
+		};
 		try {
 			setMessages(prev => [...prev, newMessage]);
-			setLoading(true);
-			const response = await sendMessage(id, newMessage, token);
+			setGenerating(true);
+			const response = await sendMessage(id, userInput, token);
 			setMessages(prev => [
 				...prev,
 				response
@@ -85,13 +106,21 @@ export default function ChatPage() {
 		} catch {
 			setError("Something went wrong. Response wasn't generated.");
 		} finally {
-			setLoading(false);
+			setGenerating(false);
 		}
 	}
 	// scroll to the bottom of the chat
 	useEffect(() => {
-		chatBottom.current.scrollIntoView({ behavior: 'smooth' });
-	}, [loading]);
+		!loading && chatBottom.current.scrollIntoView({ behavior: 'smooth' });
+	}, [generating]);
+
+	if (loading) {
+		return(	
+		<div>
+			<p>loading</p>
+		</div>
+		)
+	}
 
 
 	return (
@@ -104,7 +133,7 @@ export default function ChatPage() {
 				<div id="chat-title"><span className="bold-text">Title:</span> {chat.title}</div>
 				<div id="chatbox">
 					{messages.map((message, index) => <MessageBubble message={message} key={index} />)}
-					{loading
+					{generating
 						&& <p>generating response <PiSpinnerGap className="spinner" /></p>}
 					{
 						error &&

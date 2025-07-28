@@ -28,7 +28,7 @@ export default function Navbar() {
                     ? (<>
                         <NavLink to="chats" id="chats-link">Chats</NavLink>
                         {
-                            user.currentUser.name.trim()
+                            user.currentUser.name?.trim()
                                 ? <NavLink to="profile">Welcome, {user.currentUser.name}</NavLink>
                                 : <NavLink to="profile">Profile</NavLink>
                         }

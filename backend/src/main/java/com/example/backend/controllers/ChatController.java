@@ -2,6 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.DTOs.ChatCreationRequest;
 import com.example.backend.DTOs.ChatCreationResponse;
+import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.*;
 import com.example.backend.services.ChatService;
@@ -40,7 +41,7 @@ public class ChatController {
     @ResponseStatus(HttpStatus.CREATED)
     public ChatCreationResponse createChat(
             @AuthenticationPrincipal JwtUser jwtUser,
-            @RequestBody ChatCreationRequest chatCreationDTO) {
+            @RequestBody ChatCreationRequest chatCreationDTO) throws ChatAlreadyExistsException {
         // ChatCreationDTO contains the chat object and the first prompt
         User user = userService.getUserByEmail(jwtUser.getUsername());
         Chat newChat = chatCreationDTO.getChat();

@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.Message;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,11 +30,14 @@ public class ChatService {
         return chatRepository.findAllByUserEmail(email);
     }
 
-    // creates a new chat, adds the first prompt and response to it
+    // The method creates a new chat, adds the first prompt and response to it.
+    // It is one transaction with the isolation lvl serializable
+    // because otherwise it was possible to have several chat creation requests with the same id
+    // one after another and the last one got actually saved in the DB.
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Chat createChat(Chat newChat, String firstPrompt) {
+    public Chat createChat(Chat newChat, String firstPrompt) throws ChatAlreadyExistsException {
         if (chatRepository.existsById(newChat.getId())) {
-            throw new IllegalArgumentException("Chat with this ID already exists");
+            throw new ChatAlreadyExistsException();
         }
         newChat.setMessages(new ArrayList<Message>());
         // the instruction was moved to the AI services

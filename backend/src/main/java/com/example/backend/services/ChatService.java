@@ -5,6 +5,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import com.example.backend.repositories.ChatRepository;
 import com.example.backend.models.Chat;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,7 @@ public class ChatService {
     }
 
     // creates a new chat, adds the first prompt and response to it
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Chat createChat(Chat newChat, String firstPrompt) {
         if (chatRepository.existsById(newChat.getId())) {
             throw new IllegalArgumentException("Chat with this ID already exists");

@@ -7,10 +7,12 @@ export const AuthContext = createContext();
 // It passes the user, the token, the functions, and the loading state down to its children. 
 export default function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('auth-token') || null);
+    const [token, setToken] = useState(JSON.parse(localStorage.getItem('auth-token')) || null);
     const [initialChats, setInitialChats] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
+    // fetches the user's profile and chats in one call 
     useEffect(() => {
         async function fetchInitialData() {
             setLoading(true);
@@ -21,18 +23,14 @@ export default function AuthProvider({ children }) {
                 setCurrentUser({ username: userData.username, email: userData.email });
                 setInitialChats(userData.chats);
             } catch {
-                setToken(null);
-                setCurrentUser(null);
+                logout();
             } finally {
                 setLoading(false);
             }
         };
         if (token) {
             fetchInitialData();
-        } else {
-            // navigate to homepage or to login?
         }
-
     }, [token]);
 
     // save a user object to the DB
@@ -53,11 +51,6 @@ export default function AuthProvider({ children }) {
             const newToken = await getAuthToken({ username: email, password: password });
             setToken(newToken);
             localStorage.setItem("auth-token", JSON.stringify(newToken));
-            const userData = await getUserData(newToken);
-            setCurrentUser({ username: userData.username, email: userData.email });
-            // here user is an object with properties: username, email, chats (list of chat objects)
-            setInitialChats(userData.chats);
-            console.log(userData.chats);
         } catch {
             // TODO: error page or error message
 

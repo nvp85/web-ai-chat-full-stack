@@ -209,7 +209,6 @@ export async function getChatMessages(chatId, token) {
             },
         }
     );
-    const data = await response.json();
     if (response.status === 401) {
         throw new Error("Invalid token.");
     } else if (response.status === 400) {
@@ -217,6 +216,7 @@ export async function getChatMessages(chatId, token) {
     } else if (!response.ok) {
         throw new Error("Failed to fetch the chat messages.");
     }
+    const data = await response.json();
     return data; // returns an array of messages
 }
 

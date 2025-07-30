@@ -11,28 +11,33 @@ import Modal from '../Modal/Modal';
 import NotFound from "../NotFound";
 import { useChatList } from "../../hooks/useChatList";
 import { startChat, getChatMessages } from "../../api/api";
+import LoadingMessage from '../LoadingMessage/LoadingMessage';
 
 // displays a side bar with the chat list and an individual chat on the right
 // manages the chat
 export default function ChatPage() {
 	const { token } = useAuth();
-	const { chats, setChats } = useChatList();
+	const { chats, setChats, chatsLoading } = useChatList();
 	const location = useLocation();
-	const firstMessage = location.state?.firstMessage ? { content: location.state?.firstMessage, role: "user" } : null;
-	const [generating, setGenerating] = useState(location.state?.firstMessage ? true : false);
+	// this useRef to make sure that a new chat request is sent only once
+	const firstMessage = useRef(location.state?.firstMessage ? { content: location.state?.firstMessage, role: "user" } : null);
+	const [generating, setGenerating] = useState(firstMessage.current ? true : false);
 	const [error, setError] = useState("");
 	const chatBottom = useRef();
-	const [ loading, setLoading ] = useState(true);
+	const [ loading, setLoading ] = useState(firstMessage.current ? false : true);
+	// always clear the state so a new chat will not be created more than once
+	// although there is already useRef for this purpose 
+	// it won't hurt to clear out the location state, too
+	window.history.replaceState({}, '');
 
 	// extracts uuid of the chat
 	const { id } = useParams();
 
-	const [messages, setMessages] = useState(firstMessage ? [firstMessage] : null);
-	console.log(chats);
+	const [messages, setMessages] = useState(firstMessage.current ? [firstMessage.current] : null);
+
 	let chat = null;
 	try {
 		chat = chats.find(chat => chat.id == id);
-		console.log(chat);
 		if (!chat) {
 			throw new Error("No chat was found.");
 		}
@@ -47,38 +52,51 @@ export default function ChatPage() {
 				const messagesData = await getChatMessages(id, token);
 				setMessages(messagesData);
 			} catch(err) {
-				console.log(err);
+				console.log(err.message);
+				setError("Failed to fetch messages.");
 			} finally {
 				setLoading(false);
 			}
 		}
-		fetchMessages();
+		// it doesn't need to fetch messages if it's a new chat 
+		// only new chats have the length of 1
+		if (!messages || messages.length > 1) {
+			fetchMessages();
+		}
+		
 	}, [id]);
 
-
 	useEffect(() => {
+		console.log("running the use effect");
 		(async function () {
-			if (location.state?.firstMessage && messages === null) {
+			if (firstMessage.current) {
+				console.log("trying to send the request");
+				
+				console.log(location.state);
 				let newChat = {
 					chat: {
 						id: id,
 						llModel: { id: 1 }
 					},
-					firstPrompt: firstMessage
+					firstPrompt: firstMessage.current.content
 				}
+				firstMessage.current = null;
+				// TODO: this needs to be handled in a uniform way
+				const role = newChat.chat.llModel.id === 1 ? "assistant" : "model";
 				try {
 					newChat = await startChat(newChat, token);
 					setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]);
-					setMessages(prev => [...prev, newChat.response]);
+					setMessages(prev => [...prev, {content: newChat.response, role}]);
 				} catch {
 					setError("Something went wrong. Failed to start the chat.");
 					setGenerating(false);
-				} finally {
-					window.history.replaceState({}, '');
 				}
 			}
 		})();
-
+		return () => {
+			console.log("run cleanup");
+			//window.history.replaceState({}, '');
+		};
 	}, []);
 
 
@@ -86,6 +104,7 @@ export default function ChatPage() {
 		setGenerating(false);
 	}
 
+	// handles submit of a new message
 	async function handleSubmit(userInput) {
 		if (!userInput.trim()) {
 			setError("Your message should not be empty.");

@@ -2,6 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.DTOs.ChatCreationRequest;
 import com.example.backend.DTOs.ChatCreationResponse;
+import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.*;
 import com.example.backend.services.ChatService;
 import com.example.backend.services.UserService;
@@ -37,7 +38,9 @@ public class ChatController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ChatCreationResponse createChat(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody ChatCreationRequest chatCreationDTO) {
+    public ChatCreationResponse createChat(
+            @AuthenticationPrincipal JwtUser jwtUser,
+            @RequestBody ChatCreationRequest chatCreationDTO) {
         // ChatCreationDTO contains the chat object and the first prompt
         User user = userService.getUserByEmail(jwtUser.getUsername());
         Chat newChat = chatCreationDTO.getChat();
@@ -48,14 +51,18 @@ public class ChatController {
 
     // Get chat by id without its messages
     @GetMapping("/{chatId}")
-    public Chat getChatById(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
+    public Chat getChatById(
+            @AuthenticationPrincipal JwtUser jwtUser,
+            @PathVariable UUID chatId) throws NotFoundException {
         // validate ownership: getChatOrThrow will return the chat only if it belongs to the curr user
         return chatService.getChatOrThrow(chatId, jwtUser.getUsername());
     }
 
     // I would use PATCH here but the project requirements say PUT
     @PutMapping("/{chatId}")
-    public Chat updateChatTitle(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId, @RequestBody Chat newTitle) {
+    public Chat updateChatTitle(
+            @AuthenticationPrincipal JwtUser jwtUser,
+            @PathVariable UUID chatId, @RequestBody Chat newTitle) throws NotFoundException {
         // we need only the title from the request body Chat object
         // getChatOrThrow will return the chat only if it belongs to the curr user
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
@@ -64,13 +71,17 @@ public class ChatController {
 
     @DeleteMapping("/{chatId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteChat(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
+    public void deleteChat(
+            @AuthenticationPrincipal JwtUser jwtUser,
+            @PathVariable UUID chatId) throws NotFoundException {
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         chatService.deleteChat(chat);
     }
 
     @GetMapping("/{chatId}/messages")
-    public List<Message> getChatMessages(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId) {
+    public List<Message> getChatMessages(
+            @AuthenticationPrincipal JwtUser jwtUser,
+            @PathVariable UUID chatId) throws NotFoundException {
         // getChatOrThrow will return the chat only if it belongs to the curr user
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         return chat.getMessages();
@@ -78,7 +89,9 @@ public class ChatController {
 
     @PostMapping("/{chatId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
-    public Message promptAndGetResponse(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable UUID chatId, @RequestBody Message prompt) {
+    public Message promptAndGetResponse(
+            @AuthenticationPrincipal JwtUser jwtUser,
+            @PathVariable UUID chatId, @RequestBody Message prompt) throws NotFoundException {
         // validate ownership
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         prompt.setRole("user");
@@ -91,5 +104,10 @@ public class ChatController {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }

@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.Message;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -61,9 +62,9 @@ public class ChatService {
         return chat;
     }
 
-    public Chat getChatById(UUID chatId) {
+    public Chat getChatById(UUID chatId) throws NotFoundException{
         return chatRepository.findById(chatId)
-                .orElseThrow(() -> new IllegalArgumentException("Chat not found with ID: " + chatId));
+                .orElseThrow(() -> new NotFoundException("Chat not found with ID: " + chatId));
     }
 
     public Message addPromptAndResponse(Chat chat, Message prompt) {
@@ -79,7 +80,7 @@ public class ChatService {
     }
 
     // returns the chat if it belongs to the user, otherwise throws an exception
-    public Chat getChatOrThrow(UUID chatId, String email) {
+    public Chat getChatOrThrow(UUID chatId, String email) throws NotFoundException {
         Chat chat = getChatById(chatId);
         if (!chat.getUser().getEmail().equals(email)) {
             // Spring security will handle this exception

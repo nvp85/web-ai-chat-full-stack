@@ -213,6 +213,8 @@ export async function getChatMessages(chatId, token) {
         throw new Error("Invalid token.");
     } else if (response.status === 400) {
         throw new Error("Bad request.");
+    } else if (response.status === 404) {
+        throw new Error("Not found");
     } else if (!response.ok) {
         throw new Error("Failed to fetch the chat messages.");
     }
@@ -248,10 +250,10 @@ export default async function sendMessage(chatId, message, token) {
 
 // LLM
 // get a list of supported LLMs (temporarily hardcoded)
-export async function getLLMs() {
+export function getLLMs() {
     return [{
         id: 1,
-        name: "gpt-o4-mini",
+        name: "gpt-4o-mini",
         provider: "OpenAI",
     },
     {

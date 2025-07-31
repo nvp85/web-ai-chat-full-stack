@@ -17,14 +17,15 @@ import LoadingMessage from '../LoadingMessage/LoadingMessage';
 // manages the chat
 export default function ChatPage() {
 	const { token } = useAuth();
-	const { chats, setChats, chatsLoading } = useChatList();
+	const { chats, setChats, chatsLoading, fetchChats } = useChatList();
 	const location = useLocation();
 	// this useRef to make sure that a new chat request is sent only once
 	const firstMessage = useRef(location.state?.firstMessage ? { content: location.state?.firstMessage, role: "user" } : null);
 	const [generating, setGenerating] = useState(firstMessage.current ? true : false);
 	const [error, setError] = useState("");
 	const chatBottom = useRef();
-	const [ loading, setLoading ] = useState(firstMessage.current ? false : true);
+	const [loading, setLoading] = useState(firstMessage.current ? false : true);
+	const navigate = useNavigate();
 	// always clear the state so a new chat will not be created more than once
 	// although there is already useRef for this purpose 
 	// it won't hurt to clear out the location state, too
@@ -35,15 +36,11 @@ export default function ChatPage() {
 
 	const [messages, setMessages] = useState(firstMessage.current ? [firstMessage.current] : null);
 
-	let chat = null;
-	try {
-		chat = chats.find(chat => chat.id == id);
-		if (!chat) {
-			throw new Error("No chat was found.");
-		}
-	} catch {
-		return <NotFound />
-	}
+	// If the messages fetch returns not found
+	// this flag will be set to true
+	const [notFound, setNotFound] = useState(false);
+
+	const chat = chats?.find(chat => chat.id == id) || null;
 
 	useEffect(() => {
 		async function fetchMessages() {
@@ -51,9 +48,16 @@ export default function ChatPage() {
 			try {
 				const messagesData = await getChatMessages(id, token);
 				setMessages(messagesData);
-			} catch(err) {
-				console.log(err.message);
-				setError("Failed to fetch messages.");
+				 // if the chat exists in the DB but is not on the list for some reason
+				if (!chat) {
+					fetchChats();
+				}
+			} catch (err) {
+				if (err.message == "Not found") {
+					setNotFound(true);
+				} else {
+					setError("Failed to fetch messages.");
+				}
 			} finally {
 				setLoading(false);
 			}
@@ -63,40 +67,35 @@ export default function ChatPage() {
 		if (!messages || messages.length > 1) {
 			fetchMessages();
 		}
-		
+
 	}, [id]);
 
 	useEffect(() => {
-		console.log("running the use effect");
-		(async function () {
-			if (firstMessage.current) {
-				console.log("trying to send the request");
-				
-				console.log(location.state);
-				let newChat = {
-					chat: {
-						id: id,
-						llModel: { id: 1 }
-					},
-					firstPrompt: firstMessage.current.content
-				}
-				firstMessage.current = null;
-				// TODO: this needs to be handled in a uniform way
-				const role = newChat.chat.llModel.id === 1 ? "assistant" : "model";
-				try {
-					newChat = await startChat(newChat, token);
-					setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]);
-					setMessages(prev => [...prev, {content: newChat.response, role}]);
-				} catch {
-					setError("Something went wrong. Failed to start the chat.");
-					setGenerating(false);
-				}
+		async function sendNewChatRequest() {
+			let newChat = {
+				chat: {
+					id: id,
+					llModel: chat?.llModel || {id: 1}
+				},
+				firstPrompt: firstMessage.current.content
 			}
-		})();
-		return () => {
-			console.log("run cleanup");
-			//window.history.replaceState({}, '');
-		};
+			firstMessage.current = null;
+			// TODO: this needs to be handled in a uniform way
+			const role = newChat.chat.llModel.id === 1 ? "assistant" : "model";
+			try {
+				newChat = await startChat(newChat, token);
+				setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]);
+				setMessages(prev => [...prev, { content: newChat.response, role }]);
+			} catch {
+				setError("Something went wrong. Failed to start the chat.");
+				setGenerating(false);
+				fetchChats(); // re-fetch the chats to remove the one that is not in the DB
+			}
+
+		}
+		if (firstMessage.current && chat) {
+			sendNewChatRequest();
+		}
 	}, []);
 
 
@@ -105,7 +104,11 @@ export default function ChatPage() {
 	}
 
 	// handles submit of a new message
-	async function handleSubmit(userInput) {
+	async function submitMessage(userInput) {
+		// make sure that nothing is loading or generating (no calls are in progress)
+		if (generating || loading) {
+			return;
+		}
 		if (!userInput.trim()) {
 			setError("Your message should not be empty.");
 			return;
@@ -130,17 +133,21 @@ export default function ChatPage() {
 	}
 	// scroll to the bottom of the chat
 	useEffect(() => {
-		!loading && chatBottom.current.scrollIntoView({ behavior: 'smooth' });
+		!loading && !chatsLoading && chatBottom?.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [generating]);
 
-	if (loading) {
-		return(	
-		<div>
-			<p>loading</p>
-		</div>
+
+	if (chatsLoading) {
+		return (
+			<div>
+				<p>The chats are loading...</p>
+			</div>
 		)
 	}
 
+	if (notFound) {
+		return <NotFound />
+	}
 
 	return (
 		<div className="two-column-container">
@@ -149,22 +156,35 @@ export default function ChatPage() {
 				<p><Link to="/">Start new chat</Link></p>
 			</div>
 			<div id="chat-container">
-				<div id="chat-title"><span className="bold-text">Title:</span> {chat.title}</div>
+				<div id="chat-title"><span className="bold-text">{chat?.llModel.name}:</span> {chat?.title}</div>
+				<div id="chat-model"><span className="bold-text">{chat?.llModel.name}</span></div>
 				<div id="chatbox">
+					{loading ?
+					<div>Loading the messages...</div>
+					:
+					 <>
 					{messages.map((message, index) => <MessageBubble message={message} key={index} />)}
 					{generating
 						&& <p>generating response <PiSpinnerGap className="spinner" /></p>}
 					{
 						error &&
-						<Modal onClose={() => setError("")} btnText='Close'>
+						<Modal 
+							onClose={() => {
+								setError("");
+								if (error.includes("Failed to start the chat")) {
+									navigate("/");
+								}
+								}} 
+							btnText='Close'>
 							<h3>Error</h3>
 							<p className='red-text'>{error}</p>
 						</Modal>
 					}
 					<div ref={chatBottom} />
+					</>}
 				</div>
 				<div id="chat-input-box">
-					<ChatTextarea handleClick={handleSubmit} />
+					<ChatTextarea handleClick={submitMessage} />
 				</div>
 			</div>
 		</div>

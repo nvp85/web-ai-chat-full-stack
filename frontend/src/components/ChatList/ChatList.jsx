@@ -18,10 +18,13 @@ export default function ChatList({ currentChatId = null }) {
     const displayedChats = chats?.toSorted((a, b) => b.lastModified - a.lastModified);
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+
     // this current chat is for the modal dialog context
     const [currChat, setCurrChat] = useState(null);
     const [error, setError] = useState("");
-    const navAway = useRef(false); // if the user was navigated away this will be set to true
+
+    // if the user was navigated away this ref will be set to true
+    const navAway = useRef(false); 
 
     async function handleDelete(id) {
         if (id === currentChatId) {
@@ -39,7 +42,8 @@ export default function ChatList({ currentChatId = null }) {
         }
     }
 
-    async function rename(id, title) {
+    // renames a chat
+    async function renameChat(id, title) {
         title = title.trim();
         if (!title) {
             setError("Title should not be empty.");
@@ -49,7 +53,7 @@ export default function ChatList({ currentChatId = null }) {
             const chat = await updateChatTitle(id, title, token);
             setChats(prev => [...prev.filter(chat => chat.id != id), chat]);
         } catch {
-            setError("Failed to rename the chat.");
+            setError("Failed to renameChat the chat.");
         }
     }
 
@@ -76,7 +80,7 @@ export default function ChatList({ currentChatId = null }) {
             <h3>Your chats</h3>
             <ul>
                 {displayedChats?.length > 0
-                    ? displayedChats.map(chat => <ChatListItem chat={chat} key={chat.id} deleteChat={confirmDelete} rename={rename} />)
+                    ? displayedChats.map(chat => <ChatListItem chat={chat} key={chat.id} deleteChat={confirmDelete} renameChat={renameChat} />)
                     : <li style={{ textAlign: "center" }}>The chat list is empty</li>
                 }
             </ul>

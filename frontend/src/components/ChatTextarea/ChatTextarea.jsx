@@ -2,6 +2,7 @@ import { useState } from "react";
 import './ChatTextarea.css';
 
 
+// reusable textarea component with a submit button
 export default function ChatTextarea(props) {
     const handleClick = props.handleClick;
     const [userInput, setUserInput] = useState("");

@@ -4,6 +4,14 @@ import { useAuth } from '../../hooks/useAuth';
 
 export default function ProtectedRoutes() {
     const user = useAuth();
+    console.log(user.currentUser);
+    if (user.authLoading) {
+        return (
+            <div>
+                <p>Loding user data...</p>
+            </div>
+        )
+    } 
 
     if (!user.currentUser) {
         return <Navigate to="login" />

@@ -9,7 +9,7 @@ export default function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [token, setToken] = useState(JSON.parse(localStorage.getItem('auth-token')) || null);
     const [initialChats, setInitialChats] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(token ? true : false);
     const [error, setError] = useState(null);
 
     // fetches the user's profile and chats in one call 
@@ -43,7 +43,7 @@ export default function AuthProvider({ children }) {
         setLoading(false);
     }
 
-    // load up user's data from the DB
+    // aquires the access token and puts it to the local storage
     const login = async (email, password) => {
         setLoading(true);
         try {
@@ -72,13 +72,6 @@ export default function AuthProvider({ children }) {
             // error page
 
         }
-    }
-    if (loading) {
-        return (
-            <div>
-                <p>Loding user data...</p>
-            </div>
-        )
     }
 
     return (

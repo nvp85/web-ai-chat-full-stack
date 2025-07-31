@@ -4,24 +4,28 @@ import { FiEdit3 } from "react-icons/fi";
 import { useState, useEffect, useRef } from 'react';
 import { TiTickOutline } from "react-icons/ti";
 
-
-export default function ChatListItem({ chat, deleteChat, rename }) {
+// individual chat list item
+export default function ChatListItem({ chat, deleteChat, renameChat }) {
     const [editing, setEditing] = useState(false);
     const [newTitle, setNewTitle] = useState(chat.title);
     const editImput = useRef();
 
-    function handleClick() {
+    function openEditMode() {
         setEditing(true);
         setNewTitle(chat.title);
     }
 
+    // submit the new title
     function handleSubmit(e) {
         e.preventDefault();
-        rename(chat.id, newTitle);
+        renameChat(chat.id, newTitle);
         setEditing(false);
     }
 
-    function handleBlur() {
+    // The function exit edit mode on blur (click outside)
+    // Blur event fires before Click event
+    // so without the delay there is no way to click the submit button
+    function exitEditMode() {
         setTimeout(() => setEditing(false), 200);
     }
 
@@ -39,7 +43,7 @@ export default function ChatListItem({ chat, deleteChat, rename }) {
                         name='newTitle'
                         value={newTitle}
                         onChange={(e) => setNewTitle(e.target.value)}
-                        onBlur={handleBlur}
+                        onBlur={exitEditMode}
                         ref={editImput}
                         maxLength="50"
                     />
@@ -48,7 +52,7 @@ export default function ChatListItem({ chat, deleteChat, rename }) {
             : (
                 <>
                     <span className='chat-title'><NavLink to={`/chats/${chat.id}`} >{chat.title}</NavLink></span>
-                    <button onClick={handleClick} className='icon-btn'><FiEdit3 /></button>
+                    <button onClick={openEditMode} className='icon-btn'><FiEdit3 /></button>
                     <button
                         onClick={() => deleteChat(chat)}
                         value={chat.id}

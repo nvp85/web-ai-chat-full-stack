@@ -7,17 +7,21 @@ import Modal from '../Modal/Modal';
 import { useChatList } from '../../hooks/useChatList';
 import bot from '../../assets/chat-bot.png';
 import { useAuth } from '../../hooks/useAuth';
+import { getLLMs } from '../../api/api';
 
 
 export default function HomePage() {
     // dispays the side bar with the list of chats on the left side
     // and a chat starter form on the right side
     // when user starts a new chat it navigates the user to an individual chat route
-    const { token } = useAuth();
+    const { token, currentUser, authLoading } = useAuth();
     const { chats, setChats } = useChatList();
     const [error, setError] = useState("");
     const navigate = useNavigate();
-
+    
+    const llms = getLLMs();
+    const [selectedLlmId, setSelectedLlmId] = useState(1);
+    const llmsJSX = llms.map(llm => <option key={llm.id} value={llm.id}>{`${llm.name}, ${llm.provider}`}</option>);
 
     async function startNewChat(userInput) {
         if (!userInput.trim()) {
@@ -25,19 +29,18 @@ export default function HomePage() {
             return;
         }
         const chatId = crypto.randomUUID();
-        // TODO: generate a title (probably as a separate convo)
-        // untitled chat for now
+        // temporary chat object that will be replaced by the returned from backend chat
         const chat = {
             id: chatId,
-            //userId: manageUser.currentUser.id,
             title: "untitled",
-            lastModified: Date.now()
+            lastModified: Date.now(),
+            llModel: llms[selectedLlmId-1]
         };
         setChats(prev => [...prev, chat]);
         // passes the first message to the chat page that will send it
         navigate(`chats/${chatId}`, { state: { firstMessage: userInput } });
     }
-    if (!token) {
+    if (!currentUser) {
         return (
             <div id="landing">
 
@@ -55,6 +58,9 @@ export default function HomePage() {
                 <ChatList chats={chats} />
             </div>
             <div id="right-column">
+                <select id="llm-select" name={selectedLlmId} value={selectedLlmId} onChange={(e) => setSelectedLlmId(e.target.value)}>
+                    {llmsJSX}
+                </select>
                 <ChatTextarea handleClick={startNewChat} />
                 {
                     error &&

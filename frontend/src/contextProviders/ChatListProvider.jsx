@@ -6,9 +6,9 @@ import { getChatList, updateChatTitle, deleteChat, getChatById } from "../api/ap
 export const ChatListContext = createContext();
 
 export default function ChatListProvider({ children }) {
-    const { currentUser, initialChats, token } = useAuth();
-    const [chats, setChats] = useState(initialChats || null);
-    const [ chatsLoading, setChatsLoading ] = useState(true);
+    const { currentUser, initialChats, token, authLoading } = useAuth();
+    const [chats, setChats] = useState(null);
+    const [ chatsLoading, setChatsLoading ] = useState(authLoading);
 
 
     async function fetchChats() {
@@ -23,12 +23,14 @@ export default function ChatListProvider({ children }) {
         }
     }
 
+    // if the auth provider has just loaded initial data then 
+    // set the chats
     useEffect(() => {
-        if (!currentUser) {
-            return;
+        if (currentUser && !authLoading) {
+            setChats(initialChats);
+            setChatsLoading(false);
         }
-        fetchChats();
-    }, [token]);
+    }, [authLoading]);
 
 
     return (

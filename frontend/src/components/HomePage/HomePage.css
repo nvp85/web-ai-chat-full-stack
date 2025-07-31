@@ -25,3 +25,20 @@
     font-weight: bold;
     color: rgb(4, 55, 74);
 }
+
+#llm-select {
+    max-width: fit-content;
+    margin-left: 25%;
+    margin-right: auto;
+    margin-bottom: 5rem;
+    background-color: white;
+    border-radius: 1rem;
+    height: 4rem;
+    font-size: 1.5rem;
+    border: solid 0.1rem rgb(138, 138, 151);
+    padding: 1rem;
+}
+
+#llm-select:hover {
+    background-color: aquamarine;
+}

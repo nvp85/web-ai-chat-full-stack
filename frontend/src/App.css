@@ -139,6 +139,7 @@ button {
     .two-column-container>div:first-child {
         display: none;
     }
+    
     #chat-title {
         position: absolute;
         top: 0;
@@ -148,6 +149,10 @@ button {
         padding: 0.3rem;
         display: block;
         box-shadow: 0.5rem 0.5rem 1rem lightgray ;
+    }
+
+    #chat-model {
+        display: none;
     }
 }
 

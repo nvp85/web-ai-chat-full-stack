@@ -12,32 +12,35 @@ import AuthProvider from "./contextProviders/AuthProvider";
 import ProtectedRoutes from "./components/ProtectedRoutes/ProtectedRoutes";
 import NotFound from "./components/NotFound";
 import ChatListProvider from './contextProviders/ChatListProvider';
+import RootErrorBoundary from "./errorBoundaries/RootErrorBoundary";
+
 
 
 function App() {
     return (
-        <AuthProvider>
-            <ChatListProvider>
-                <BrowserRouter>
-                    <Routes>
-                        <Route element={<Layout />}>
-                            <Route path="login" element={<SignIn />} />
-                            <Route path="register" element={<SignUp />} />
-                            <Route path="about" element={<AboutPage />} />
-                            <Route path="" element={<HomePage />} />
-                            
-                            <Route element=<ProtectedRoutes /> >
-                                <Route path="chats/:id" element={<ChatPage />} />
-                                <Route path="chats" element={<ChatList />} />
-                                <Route path="profile" element={<Profile />} />
-                            </Route>
-                            <Route path="*" element={<NotFound />} />
-                        </Route>
-                    </Routes>
-                </BrowserRouter>
-            </ChatListProvider>
-        </AuthProvider>
+        <RootErrorBoundary>
+            <AuthProvider>
+                <ChatListProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route element={<Layout />}>
+                                <Route path="login" element={<SignIn />} />
+                                <Route path="register" element={<SignUp />} />
+                                <Route path="about" element={<AboutPage />} />
+                                <Route path="" element={<HomePage />} />
 
+                                <Route element=<ProtectedRoutes /> >
+                                    <Route path="chats/:id" element={<ChatPage />} />
+                                    <Route path="chats" element={<ChatList />} />
+                                    <Route path="profile" element={<Profile />} />
+                                </Route>
+                                <Route path="*" element={<NotFound />} />
+                            </Route>
+                        </Routes>
+                    </BrowserRouter>
+                </ChatListProvider>
+            </AuthProvider>
+        </RootErrorBoundary>
     )
 
 }

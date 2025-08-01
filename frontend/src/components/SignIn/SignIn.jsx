@@ -1,22 +1,24 @@
 import { Link, useNavigate, Navigate } from 'react-router';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import './SignIn.css';
 import { isEmailValid } from '../../utils/utils';
 import { useAuth } from '../../hooks/useAuth';
+import ErrorModal from '../Modal/ErrorModal';
 
 export default function SignIn() {
+    // the demo user credentials are hardcoded so it's convenient to login
     const [formData, setFormData] = useState({
-        email: "demouser@example.com", 
+        email: "demouser@example.com",
         password: "qwerty"
     });
     const [showPassword, setShowPassword] = useState(false);
-    const manageUser = useAuth();
+    const auth = useAuth();
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    // if there is an info in the local storage then user is logged in
-    if (manageUser.currentUser) {
+    // if there is a valid token in the local storage then user is logged in
+    if (auth.currentUser) {
         return <Navigate to='/' />
     }
 
@@ -31,8 +33,8 @@ export default function SignIn() {
             return;
         };
         try {
-            manageUser.login(formData.email, formData.password);  
-            navigate("/");  
+            auth.login(formData.email, formData.password);
+            navigate("/");
         } catch (err) {
             setError(err.message);
         }
@@ -40,7 +42,7 @@ export default function SignIn() {
 
     function handleChange(e) {
         const { name, value } = e.target;
-        setFormData(prev => ({...prev, [name]: value}));
+        setFormData(prev => ({ ...prev, [name]: value }));
     }
 
     function togglePassword(e) {
@@ -49,33 +51,39 @@ export default function SignIn() {
     }
 
     return (
-        <div className="form-container">
-            <h1>Sign In</h1>
-            <p>Don't have an accout? Register <Link to="/register">here</Link>.</p>
-            {error ? <p className="red-text">{error}</p> : "" }
-            <form id="login-form" className="form" onSubmit={handleSubmit}>
-                <input 
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    placeholder="Email"
-                    onChange={handleChange}
-                    maxLength="150"
-                    required
+        <>
+            <div className="form-container">
+                <h1>Sign In</h1>
+                <p>Don't have an accout? Register <Link to="/register">here</Link>.</p>
+                {error ? <p className="red-text">{error}</p> : ""}
+                <form id="login-form" className="form" onSubmit={handleSubmit}>
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        placeholder="Email"
+                        onChange={handleChange}
+                        maxLength="150"
+                        required
                     />
-                <input 
-                    type={showPassword ? "text" : "password"} 
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    maxLength="150"
-                    required
-                    placeholder="Password"/>
-                <button type="button" className="eye-btn" onClick={togglePassword}>
-                    {showPassword ? <LuEye /> : <LuEyeOff /> }
-                </button>
-                <button type="submit" className="btn" id="login-btn">submit</button>
-            </form>
-        </div>
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        maxLength="150"
+                        required
+                        placeholder="Password" />
+                    <button type="button" className="eye-btn" onClick={togglePassword}>
+                        {showPassword ? <LuEye /> : <LuEyeOff />}
+                    </button>
+                    <button type="submit" className="btn" id="login-btn">submit</button>
+                </form>
+
+            </div>
+            {auth.authError && auth.authError.includes("expired") &&
+                <ErrorModal onClose={() => auth.setAuthError(null)}>{auth.authError}</ErrorModal>
+            }
+        </>
     )
 }

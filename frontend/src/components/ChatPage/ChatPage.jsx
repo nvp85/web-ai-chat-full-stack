@@ -16,7 +16,7 @@ import LoadingMessage from '../LoadingMessage/LoadingMessage';
 // displays a side bar with the chat list and an individual chat on the right
 // manages the chat
 export default function ChatPage() {
-	const { token } = useAuth();
+	const { token, handleUnauthorized } = useAuth();
 	const { chats, setChats, chatsLoading, fetchChats } = useChatList();
 	const location = useLocation();
 	// this useRef to make sure that a new chat request is sent only once
@@ -46,21 +46,23 @@ export default function ChatPage() {
 		async function fetchMessages() {
 			setLoading(true);
 			try {
+				//throw new Error("Invalid token.");
 				const messagesData = await getChatMessages(id, token);
 				setMessages(messagesData);
 				 // if the chat exists in the DB but is not on the list for some reason
 				if (!chat) {
 					fetchChats();
 				}
+				setLoading(false);
 			} catch (err) {
-				if (err.message == "Not found") {
+				if (err.message === "Invalid token.") {
+					handleUnauthorized();
+				} else if (err.message === "Not found") {
 					setNotFound(true);
 				} else {
 					setError("Failed to fetch messages.");
 				}
-			} finally {
-				setLoading(false);
-			}
+			} 
 		}
 		// it doesn't need to fetch messages if it's a new chat 
 		// only new chats have the length of 1

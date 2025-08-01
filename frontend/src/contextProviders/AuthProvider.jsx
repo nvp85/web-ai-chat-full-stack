@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { createUser, getAuthToken, getUserData, updateUserProfile } from "../api/api";
+import { useNavigate } from "react-router";
 
 export const AuthContext = createContext();
 
@@ -22,8 +23,13 @@ export default function AuthProvider({ children }) {
                 const userData = await getUserData(token);
                 setCurrentUser({ username: userData.username, email: userData.email });
                 setInitialChats(userData.chats);
-            } catch {
-                logout();
+            } catch(err) {
+                console.log(err.message);
+                if (err.message?.includes("token")) {
+                    handleUnauthorized();
+                } else {
+                    setError(err.message);
+                }
             } finally {
                 setLoading(false);
             }
@@ -74,8 +80,24 @@ export default function AuthProvider({ children }) {
         }
     }
 
+    function handleUnauthorized(message=null) {
+        // whenever we get 401 most likely it means the token has expired
+        // there is no refresh tokens so the app should redirect the user
+        // to the login page and show a message that they were logged out
+        // and should login again
+        logout();
+        setError("Session expired. Please log in again.");
+    }
+
     return (
-        <AuthContext.Provider value={{ currentUser, login, logout, updateUser, register, initialChats, token, authLoading: loading }}>
+        <AuthContext.Provider value={{
+            currentUser,
+            login, logout, updateUser, register, initialChats, token,
+            handleUnauthorized,
+            authLoading: loading,
+            authError: error,
+            setAuthError: setError
+        }}>
             {children}
         </AuthContext.Provider>
     )

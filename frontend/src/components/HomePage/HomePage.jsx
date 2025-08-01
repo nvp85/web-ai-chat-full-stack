@@ -18,7 +18,7 @@ export default function HomePage() {
     const { chats, setChats } = useChatList();
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    
+
     const llms = getLLMs();
     const [selectedLlmId, setSelectedLlmId] = useState(1);
     const llmsJSX = llms.map(llm => <option key={llm.id} value={llm.id}>{`${llm.name}, ${llm.provider}`}</option>);
@@ -34,11 +34,19 @@ export default function HomePage() {
             id: chatId,
             title: "untitled",
             lastModified: Date.now(),
-            llModel: llms[selectedLlmId-1]
+            llModel: llms[selectedLlmId - 1]
         };
         setChats(prev => [...prev, chat]);
         // passes the first message to the chat page that will send it
         navigate(`chats/${chatId}`, { state: { firstMessage: userInput } });
+    }
+
+    if (authLoading) {
+        return (
+            <div>
+                <p>Loding user data...</p>
+            </div>
+        )
     }
     if (!currentUser) {
         return (

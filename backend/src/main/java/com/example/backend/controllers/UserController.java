@@ -45,7 +45,8 @@ public class UserController {
     @PutMapping("/me") // update user's profile
     @PreAuthorize("hasRole('ROLE_USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateProfile(@AuthenticationPrincipal JwtUser jwtUser, @RequestBody User newProfile) {
+    public void updateProfile(@AuthenticationPrincipal JwtUser jwtUser,
+                              @RequestBody User newProfile) throws EmailAlreadyExistsException {
         User user = userService.getUserByEmail(jwtUser.getUsername());
         userService.updateUserProfile(user, newProfile);
     }

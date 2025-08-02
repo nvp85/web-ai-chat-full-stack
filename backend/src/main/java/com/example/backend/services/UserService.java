@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -18,7 +19,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User createUser(User user) throws EmailAlreadyExistsException {
+    public void createUser(User user) throws EmailAlreadyExistsException {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException();
         }
@@ -26,14 +27,25 @@ public class UserService {
             throw  new IllegalArgumentException("Please provide valid email and password.");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
-    // updates only username at this point
-    public void updateUserProfile(User user, User newProfile) {
+    public void updateUserProfile(User user, User newProfile) throws EmailAlreadyExistsException {
         if (newProfile.getUsername() != null) {
             user.setUsername(newProfile.getUsername());
         }
+        if (newProfile.getEmail() != null && !isEmailValid(newProfile.getEmail()) ) {
+            throw  new IllegalArgumentException("Please provide valid email.");
+        }
+        // if the user wants to change the email there shouldn't be any duplicates
+        if (newProfile.getEmail() != null && !newProfile.getEmail().equals(user.getEmail())) {
+            Optional<User> duplicate = userRepository.findByEmail(newProfile.getEmail());
+            if (duplicate.isPresent() && duplicate.get().getId() != user.getId()) {
+                throw new EmailAlreadyExistsException();
+            }
+            user.setEmail(newProfile.getEmail());
+        }
+        userRepository.save(user);
     }
 
     public List<User> getAllUsers() {

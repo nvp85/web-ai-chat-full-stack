@@ -65,6 +65,9 @@ export async function createUser(newUser) {
             body: JSON.stringify(newUser)
         }
     );
+    if (response.status === 409) {
+        throw new Error("This email is already in use.");
+    }
     if (!response.ok) {
         throw new Error("Failed to register a new user.");
     }
@@ -149,9 +152,14 @@ export async function startChat(chatCreationObj, token) {
     const data = await response.json();
     if (response.status === 401) {
         throw new Error("Invalid token.");
-    } else if (response.status === 400) {
+    }
+    if (response.status === 400) {
         throw new Error("Bad request.");
-    } else if (!response.ok) {
+    }
+    if (response.status === 409) {
+        throw new Error("The chat already exists.");
+    }
+    if (!response.ok) {
         throw new Error("Failed to create a new chat.");
     }
     return data; // returns the new chat obj and a LLM's response

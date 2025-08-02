@@ -23,7 +23,7 @@ export default function AuthProvider({ children }) {
                 const userData = await getUserData(token);
                 setCurrentUser({ username: userData.username, email: userData.email });
                 setInitialChats(userData.chats);
-            } catch(err) {
+            } catch (err) {
                 console.log(err.message);
                 if (err.message?.includes("token")) {
                     handleUnauthorized();
@@ -50,17 +50,13 @@ export default function AuthProvider({ children }) {
     }
 
     // aquires the access token and puts it to the local storage
+    // any errors will be handled in the calling component
     const login = async (email, password) => {
         setLoading(true);
-        try {
-            // we use email to login instead of username
-            const newToken = await getAuthToken({ username: email, password: password });
-            setToken(newToken);
-            localStorage.setItem("auth-token", JSON.stringify(newToken));
-        } catch {
-            // TODO: error page or error message
-
-        }
+        // we use email to login instead of username
+        const newToken = await getAuthToken({ username: email, password: password });
+        setToken(newToken);
+        localStorage.setItem("auth-token", JSON.stringify(newToken));
         setLoading(false);
     }
 
@@ -71,16 +67,12 @@ export default function AuthProvider({ children }) {
         localStorage.removeItem("auth-token");
     }
 
-    const register = (newUser) => {
-        try {
-            createUser(newUser);
-        } catch {
-            // error page
-
-        }
+    const register = async (newUser) => {
+        // any errors will be handled in the calling component
+        await createUser(newUser);
     }
 
-    function handleUnauthorized(message=null) {
+    function handleUnauthorized(message = null) {
         // whenever we get 401 most likely it means the token has expired
         // there is no refresh tokens so the app should redirect the user
         // to the login page and show a message that they were logged out

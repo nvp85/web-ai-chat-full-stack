@@ -15,7 +15,6 @@ import ChatListProvider from './contextProviders/ChatListProvider';
 import RootErrorBoundary from "./errorBoundaries/RootErrorBoundary";
 
 
-
 function App() {
     return (
         <RootErrorBoundary>
@@ -42,7 +41,6 @@ function App() {
             </AuthProvider>
         </RootErrorBoundary>
     )
-
 }
 
 export default App;

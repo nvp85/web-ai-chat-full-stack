@@ -17,7 +17,6 @@ export async function getAuthToken(creds) {
             body: JSON.stringify(creds)
         }
     );
-    const data = await response.json();
     if (response.status === 401) {
         throw new Error("Invalid credentials.");
     }
@@ -25,6 +24,7 @@ export async function getAuthToken(creds) {
         console.log(response.status)
         throw new Error("Something went wrong.");
     }
+    const data = await response.json();
     return data.accessToken.token;
 }
 
@@ -44,13 +44,13 @@ export async function getUserData(token) {
             }
         }
     );
-    const data = await response.json();
     if (response.status === 401) {
         throw new Error("Invalid token.")
     }
     if (!response.ok) {
         throw new Error("Failed to fetch user data.");
     }
+    const data = await response.json();
     return data;
 }
 
@@ -88,6 +88,9 @@ export async function updateUserProfile(newProfile, token) {
     if (response.status === 401) {
         throw new Error("Invalid token.");
     }
+    if (response.status === 409) {
+        throw new Error("This email is already in use.");
+    }
     if (!response.ok) {
         throw new Error("Failed to update the profile.");
     }
@@ -105,13 +108,13 @@ export async function getChatList(token) {
             }
         }
     );
-    const data = await response.json();
     if (response.status === 401) {
         throw new Error("Invalid token.");
     }
     if (!response.ok) {
         throw new Error("Failed to fetch user's chat list.");
     }
+    const data = await response.json();
     return data;
 }
 

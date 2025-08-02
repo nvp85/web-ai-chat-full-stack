@@ -11,7 +11,7 @@ import LoadingMessage from '../LoadingMessage/LoadingMessage';
 export default function SignIn() {
     // the demo user credentials are hardcoded so it's convenient to login
     const [formData, setFormData] = useState({
-        email: "demouser@example.com",
+        email: "demo@example.com",
         password: "qwerty"
     });
     const [showPassword, setShowPassword] = useState(false);
@@ -42,7 +42,7 @@ export default function SignIn() {
             await auth.login(formData.email, formData.password);        
             navigate("/");
         } catch (err) {
-            setLoadingText("null");
+            setLoadingText(null);
             setError(err.message);
         }
     }

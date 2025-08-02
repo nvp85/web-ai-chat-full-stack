@@ -28,8 +28,8 @@ export default function Navbar() {
                     ? (<>
                         <NavLink to="chats" id="chats-link">Chats</NavLink>
                         {
-                            user.currentUser.name?.trim()
-                                ? <NavLink to="profile">Welcome, {user.currentUser.name}</NavLink>
+                            user.currentUser.username?.trim()
+                                ? <NavLink to="profile">Welcome, {user.currentUser.username}</NavLink>
                                 : <NavLink to="profile">Profile</NavLink>
                         }
                         <button onClick={user.logout} className="btn">Logout</button>

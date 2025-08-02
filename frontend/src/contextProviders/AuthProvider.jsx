@@ -21,6 +21,7 @@ export default function AuthProvider({ children }) {
                 console.log("fetching initial data");
                 console.log(token);
                 const userData = await getUserData(token);
+                console.log(userData);
                 setCurrentUser({ username: userData.username, email: userData.email });
                 setInitialChats(userData.chats);
             } catch (err) {
@@ -40,13 +41,13 @@ export default function AuthProvider({ children }) {
     }, [token]);
 
     // save a user object to the DB
-    const updateUser = async (user) => {
-        setLoading(true);
+    const updateUser = async (user, token) => {
+        //setLoading(true);
         // the errors that the updateProfile function might throw 
         // will be caught in the calling component (the user profile component)
-        await updateUserProfile(user);
+        await updateUserProfile(user, token);
         setCurrentUser(user);
-        setLoading(false);
+       // setLoading(false);
     }
 
     // aquires the access token and puts it to the local storage

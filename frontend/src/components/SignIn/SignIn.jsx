@@ -5,6 +5,8 @@ import './SignIn.css';
 import { isEmailValid } from '../../utils/utils';
 import { useAuth } from '../../hooks/useAuth';
 import ErrorModal from '../Modal/ErrorModal';
+import LoadingMessage from '../LoadingMessage/LoadingMessage';
+
 
 export default function SignIn() {
     // the demo user credentials are hardcoded so it's convenient to login
@@ -13,17 +15,20 @@ export default function SignIn() {
         password: "qwerty"
     });
     const [showPassword, setShowPassword] = useState(false);
-    const auth = useAuth();
-    const [error, setError] = useState("");
+    const auth = useAuth(); // authError will be displayed in a modal
+    const [error, setError] = useState(""); // Form error
     const navigate = useNavigate();
+    // the state for the loading message
+    const [loadingText, setLoadingText] = useState(null);
 
     // if there is a valid token in the local storage then user is logged in
     if (auth.currentUser) {
         return <Navigate to='/' />
     }
 
-    function handleSubmit(e) {
+    async function handleSignin(e) {
         e.preventDefault();
+        // validation
         if (!formData.email || !formData.password) {
             setError("Please enter your email and password.");
             return;
@@ -33,9 +38,11 @@ export default function SignIn() {
             return;
         };
         try {
-            auth.login(formData.email, formData.password);
+            setLoadingText("Logging in");
+            await auth.login(formData.email, formData.password);        
             navigate("/");
         } catch (err) {
+            setLoadingText("null");
             setError(err.message);
         }
     }
@@ -56,7 +63,7 @@ export default function SignIn() {
                 <h1>Sign In</h1>
                 <p>Don't have an accout? Register <Link to="/register">here</Link>.</p>
                 {error ? <p className="red-text">{error}</p> : ""}
-                <form id="login-form" className="form" onSubmit={handleSubmit}>
+                <form id="login-form" className="form" onSubmit={handleSignin}>
                     <input
                         type="email"
                         name="email"
@@ -83,6 +90,9 @@ export default function SignIn() {
             </div>
             {auth.authError && auth.authError.includes("expired") &&
                 <ErrorModal onClose={() => auth.setAuthError(null)}>{auth.authError}</ErrorModal>
+            }
+            {loadingText &&
+                <LoadingMessage text={loadingText} />
             }
         </>
     )

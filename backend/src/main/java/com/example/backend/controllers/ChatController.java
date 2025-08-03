@@ -19,7 +19,6 @@ import java.util.UUID;
 
 @PreAuthorize("hasRole('ROLE_USER')")
 @RestController
-@CrossOrigin(origins = "http://localhost")
 @RequestMapping("/api/chats")
 public class ChatController {
     private final ChatService chatService;

@@ -22,7 +22,7 @@ Authentication/Authorization: [security-jwt library](https://github.com/bratkart
 
 ## Installation
 
-Prerequisites: MySQL database server, Java 21+, Maven, OpenAI and Google API keys.
+Prerequisites: Node.js, MySQL database server, Java 21+ SDK, Maven, OpenAI and Google API keys.
 
 To run this project locally implement the following steps:
 
@@ -35,13 +35,26 @@ git clone https://github.com/nvp85/web-ai-chat-full-stack.git
 npm install
 npm run dev
 ```
-* Create a database named ai-chat
+The frontend will run on http://localhost:5173.
+* Create a database schema named ai-chat
 * Set environment variables for your DB connection: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
 * Set environment variables for your OpenAI and Google API keys: GOOGLE_API_KEY and OPENAI_API_KEY
+```
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_NAME=ai-chat
+export DB_USER=root
+export DB_PASS=your-password
+export GOOGLE_API_KEY=your-key
+export OPENAI_API_KEY=your-key
+```
 * In the backend folder run
 ```
 mvn spring-boot:run
 ```
+The backend will run on http://localhost:8080.
+
+Create a new user via UI.
 ## Wireframes
 
 [Wireframes on Google Drive](https://drive.google.com/file/d/1aWjO8r3u8KOvoDtXZWIhaTN33A3SepHR/view?usp=sharing)

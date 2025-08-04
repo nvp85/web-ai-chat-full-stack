@@ -16,7 +16,6 @@ export default class RootErrorBoundary extends React.Component {
             // if there is some garbage instead of a token
             localStorage.removeItem("auth-token");
         }
-        console.log("Caught error:", error);
     }
 
     render() {

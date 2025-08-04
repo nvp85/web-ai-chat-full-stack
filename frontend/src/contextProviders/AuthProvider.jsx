@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState } from "react";
 import { createUser, getAuthToken, getUserData, updateUserProfile } from "../api/api";
-import { useNavigate } from "react-router";
 
 export const AuthContext = createContext();
 
@@ -18,14 +17,10 @@ export default function AuthProvider({ children }) {
         async function fetchInitialData() {
             setLoading(true);
             try {
-                console.log("fetching initial data");
-                console.log(token);
                 const userData = await getUserData(token);
-                console.log(userData);
                 setCurrentUser({ username: userData.username, email: userData.email });
                 setInitialChats(userData.chats);
             } catch (err) {
-                console.log(err.message);
                 if (err.message?.includes("token")) {
                     handleUnauthorized();
                 } else {
@@ -42,12 +37,10 @@ export default function AuthProvider({ children }) {
 
     // save a user object to the DB
     const updateUser = async (user, token) => {
-        //setLoading(true);
         // the errors that the updateProfile function might throw 
-        // will be caught in the calling component (the user profile component)
+        // will be caught in the consumer (the user profile component)
         await updateUserProfile(user, token);
         setCurrentUser(user);
-       // setLoading(false);
     }
 
     // aquires the access token and puts it to the local storage

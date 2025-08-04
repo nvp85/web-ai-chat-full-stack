@@ -10,14 +10,19 @@ export default function ChatListProvider({ children }) {
     const { currentUser, initialChats, token, authLoading } = useAuth();
     const [chats, setChats] = useState(null);
     const [chatsLoading, setChatsLoading] = useState(authLoading);
+    const [chatsError, setChatsError] = useState(null);
 
     // This function is for fetching the chat list
-    // error handling is on the consumers
     async function fetchChats() {
-        setChatsLoading(true);
-        const chatData = await getChatList(token);
-        setChats(chatData);
-        setChatsLoading(false);
+        try {
+            setChatsLoading(true);
+            const chatData = await getChatList(token);
+            setChats(chatData);
+        } catch (err) {
+            setChatsError(err.message);
+        } finally {
+            setChatsLoading(false);
+        }
     }
 
     // if the auth provider has just loaded initial data then 
@@ -30,7 +35,7 @@ export default function ChatListProvider({ children }) {
     }, [authLoading]);
 
     return (
-        <ChatListContext value={{ chats, setChats, fetchChats, chatsLoading }}>
+        <ChatListContext value={{ chats, setChats, fetchChats, chatsLoading, chatsError, setChatsError }}>
             {children}
         </ChatListContext>
     )

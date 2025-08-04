@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
+// This service is responsible for interaction with Gemini via Google SDK
 @Service
 public class GoogleAiService {
 
@@ -23,7 +23,7 @@ public class GoogleAiService {
     }
 
     public Message getResponse(List<Message> messages) {
-        // instruction goes separately from the chat history (in the json under the hood)
+        // instruction goes separately from the chat history (in a json under the hood)
         Content instruction = Content.fromParts(Part.fromText("You are a helpful assistant. Be succinct - answer in 3-5 sentences."));
 
         GenerateContentConfig config = GenerateContentConfig.builder()

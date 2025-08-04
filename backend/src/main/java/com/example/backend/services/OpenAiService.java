@@ -7,7 +7,7 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-
+// This service is responsible for interaction with GPT via OpenAI SDK
 @Service
 public class OpenAiService {
     private final OpenAIClient openAIClient;
@@ -17,6 +17,7 @@ public class OpenAiService {
         this.openAIClient = openAIClient;
     }
 
+    // a helper method to create a builder of a chat history (it contains all the messages)
     private ChatCompletionCreateParams.Builder createParamsBuilder(List<Message> messages, String instruction) {
         ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
         b.addSystemMessage(instruction);
@@ -35,6 +36,7 @@ public class OpenAiService {
     public Message getResponse(List<Message> messages) {
         String instruction = "You are a helpful assistant. Be succinct - answer in 3-5 sentences.";
         ChatCompletionCreateParams params = createParamsBuilder(messages, instruction).build();
+        // sends a convo and gets a response
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
         return new Message(response, "assistant", null);
     }

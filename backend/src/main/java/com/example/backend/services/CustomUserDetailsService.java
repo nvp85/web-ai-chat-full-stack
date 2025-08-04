@@ -11,10 +11,11 @@ import com.example.backend.models.User;
 
 import java.util.Collections;
 
+// Custom implementation of UserDetailsService to load user details by email
+// This service retrieves user information from the UserRepository and constructs a JwtUser object
+// The custom implementation is needed for the Auth library security-jwt
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    // Custom implementation of UserDetailsService to load user details by email
-    // This service retrieves user information from the UserRepository and constructs a JwtUser object.
 
     private final UserRepository userRepository;
 

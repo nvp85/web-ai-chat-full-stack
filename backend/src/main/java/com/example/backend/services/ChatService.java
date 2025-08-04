@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+// This service contains the business logic for working with chats
 @Service
 public class ChatService {
     private final ChatRepository chatRepository;

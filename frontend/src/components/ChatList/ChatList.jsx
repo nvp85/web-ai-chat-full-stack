@@ -1,44 +1,58 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../hooks/useAuth';
 import ChatListItem from '../ChatListItem/ChatListItem';
 import Modal from '../Modal/Modal';
 import { useChatList } from '../../hooks/useChatList';
-import { updateChatTitle, deleteChat, getChatById } from "../../api/api";
+import { updateChatTitle, deleteChat } from "../../api/api";
 import { PiSpinnerGap } from "react-icons/pi";
 import './ChatList.css';
+import LoadingMessage from '../LoadingMessage/LoadingMessage';
 
-// displays the list of chats
+// This component displays the list of chats,
 // handles renaming and deletion of a chat
 export default function ChatList({ currentChatId = null }) {
-    // chat is an object that has a title, id, userId, and lastModified properties
+    // chat is an object that has a title, id, llModel, and lastModified properties
     // chats is an array of chat objects 
-    const { token } = useAuth();
-    const { chats, setChats, fetchChats, chatsLoading } = useChatList();
+    const { token, handleUnauthorized } = useAuth();
+    const { chats, setChats, fetchChats, chatsLoading, chatsError, setChatsError } = useChatList();
     const displayedChats = chats?.toSorted((a, b) => b.lastModified - a.lastModified);
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    // the text for the loading message that is displayed when an API call is in progress
+    const [loadingText, setLoadingText] = useState(null);
 
     // this current chat is for the modal dialog context
     const [currChat, setCurrChat] = useState(null);
+
     const [error, setError] = useState("");
 
-    // if the user was navigated away this ref will be set to true
-    const navAway = useRef(false); 
-
+    // sends the chat deletion request
     async function handleDelete(id) {
-        if (id === currentChatId) {
-            navigate("/");
-            navAway.current = true;
-        }
+        setIsModalOpen(false);
+        // try to delete the chat
         try {
-            // just to be sure that we don't set the state of the component that is un-mounted
-            !navAway.current && setIsModalOpen(false);
+            setLoadingText("Deleting the chat");
             await deleteChat(id, token);
             // the chats come from the provider so it's ok to set them even in case of un-mounting
             setChats(prev => [...prev.filter(chat => chat.id != id)]);
-        } catch {
-            !navAway.current && setError("Failed to delete the chat.");
+            if (id === currentChatId) {
+                navigate("/");
+            } else {
+                setLoadingText(null);
+            }
+        } catch (err) {
+            if (err.message === "Invalid token.") {
+                handleUnauthorized(); // will navigate to the login page
+                return;
+            }
+            setLoadingText(null);
+            if (err.message === "Not found") {
+                setError("The chat was not found.");
+                fetchChats(); // to sync with the DB
+            } else {
+                setError("Failed to delete the chat.");
+            }
         }
     }
 
@@ -50,13 +64,25 @@ export default function ChatList({ currentChatId = null }) {
             return;
         }
         try {
+            setLoadingText("Updating the chat");
             const chat = await updateChatTitle(id, title, token);
             setChats(prev => [...prev.filter(chat => chat.id != id), chat]);
-        } catch {
-            setError("Failed to renameChat the chat.");
+        } catch (err) {
+            if (err.message === "Invalid token.") {
+                handleUnauthorized(); // will navigate to the login page
+                return;
+            }
+            if (err.message === "Not found") {
+                setError("The chat was not found.");
+                fetchChats(); // to sync with the DB
+            } else {
+                setError("Failed to update the title.");
+            }
         }
+        setLoadingText(null);
     }
 
+    // opens a modal dialog to confirm deletion
     function confirmDelete(chat) {
         setCurrChat(chat);
         setIsModalOpen(true);
@@ -67,6 +93,7 @@ export default function ChatList({ currentChatId = null }) {
         setCurrChat(null);
     }
 
+    // returns a spinner if the chats are loading
     if (!chats && chatsLoading) {
         return (
             <div id="chat-list">
@@ -85,7 +112,11 @@ export default function ChatList({ currentChatId = null }) {
                 }
             </ul>
             {currChat && isModalOpen &&
-                <Modal onClose={() => setIsModalOpen(false)}>
+                <Modal
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setCurrChat(null);
+                    }}>
                     <h3>Do you want to delete this chat?</h3>
                     <p>{currChat.title}</p>
                     <button onClick={() => handleDelete(currChat.id)} className='delete-btn btn'>Delete</button>
@@ -97,6 +128,16 @@ export default function ChatList({ currentChatId = null }) {
                     <h3>Error</h3>
                     <p className='red-text'>{error}</p>
                 </Modal>
+            }
+            {
+                !error && chatsError &&
+                <Modal onClose={() => setChatsError(null)} btnText='Close'>
+                    <h3>Error</h3>
+                    <p className='red-text'>{chatsError}</p>
+                </Modal>
+            }
+            {loadingText &&
+                <LoadingMessage text={loadingText} />
             }
         </div>
     )

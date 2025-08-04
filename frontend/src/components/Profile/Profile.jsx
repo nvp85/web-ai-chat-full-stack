@@ -38,7 +38,7 @@ export default function Profile() {
             }
         } catch (err) {
             if (err.message === "Invalid token.") {
-                // this function will navigate the user to the login page
+                // this function will send the user to the login page
                 handleUnauthorized(); 
             } else {
                 setLoadingText(null);

@@ -9,7 +9,7 @@ import Modal from '../Modal/Modal';
 import ErrorModal from '../Modal/ErrorModal';
 import LoadingMessage from '../LoadingMessage/LoadingMessage';
 
-// handles registration
+// Sign Up page; handles registration
 export default function SignUp() {
     const [formData, setFormData] = useState({
         name: "",
@@ -51,7 +51,7 @@ export default function SignUp() {
         setLoadingText("Creating an account");
         try {
             const user = {
-                name: formData.name,
+                username: formData.name,
                 email: formData.email,
                 password: formData.password,
             }

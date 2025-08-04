@@ -2,12 +2,14 @@ import { useState } from "react";
 import './ChatTextarea.css';
 
 
-// reusable textarea component with a submit button
+// Reusable textarea component with a submit button
+// It is used by HomePage and ChatPage components to display the textbox for a message
 export default function ChatTextarea(props) {
     const handleClick = props.handleClick;
     const [userInput, setUserInput] = useState("");
     const [ loading, setLoading ] = useState();
 
+    // actual logic is in the parent components
     async function handleSubmit(e) {
         setLoading(true);
         e.preventDefault();

@@ -1,5 +1,5 @@
 import { Link, useNavigate, Navigate } from 'react-router';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import './SignIn.css';
 import { isEmailValid } from '../../utils/utils';
@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import ErrorModal from '../Modal/ErrorModal';
 import LoadingMessage from '../LoadingMessage/LoadingMessage';
 
-
+// Sign In page
 export default function SignIn() {
     // the demo user credentials are hardcoded so it's convenient to login
     const [formData, setFormData] = useState({
@@ -89,7 +89,9 @@ export default function SignIn() {
 
             </div>
             {auth.authError && auth.authError.includes("expired") &&
-                <ErrorModal onClose={() => auth.setAuthError(null)}>{auth.authError}</ErrorModal>
+                <ErrorModal onClose={() => auth.setAuthError(null)}>
+                <p>{auth.authError}</p>
+                </ErrorModal>
             }
             {loadingText &&
                 <LoadingMessage text={loadingText} />

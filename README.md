@@ -6,12 +6,9 @@ The project is a full-stack web application built as part of the LaunchCode codi
 It offers a unified web interface for interacting with LLMs from different AI providers. Currently, the app supports two LMMs: OpenAI gpt-4o-mini and Google's Gemini flash, so users can experiment without switching tools.
 
 Core features include:
-
-Token-based authentication (no refresh tokens for simplicity).
-
-Create and manage chats: start new conversations, rename or delete existing ones.
-
-Automatically generated chat titles: the app attempts to generate a title from the first message, with a fallback if the API call fails.
+- Token-based authentication (no refresh tokens for simplicity).
+- Create and manage chats: start new conversations, rename or delete existing ones.
+- Automatically generated chat titles: the app attempts to generate a title from the first message, with a fallback if the API call fails.
 
 ## Tchnologies
 
@@ -25,6 +22,26 @@ Authentication/Authorization: [security-jwt library](https://github.com/bratkart
 
 ## Installation
 
+Prerequisites: MySQL database server, Java 21+, Maven, OpenAI and Google API keys.
+
+To run this project locally implement the following steps:
+
+* Clone the repository
+```
+git clone https://github.com/nvp85/web-ai-chat-full-stack.git
+```
+* In the frontend folder run
+```
+npm install
+npm run dev
+```
+* Create a database named ai-chat
+* Set environment variables for your DB connection: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
+* Set environment variables for your OpenAI and Google API keys: GOOGLE_API_KEY and OPENAI_API_KEY
+* In the backend folder run
+```
+mvn spring-boot:run
+```
 ## Wireframes
 
 [Wireframes on Google Drive](https://drive.google.com/file/d/1aWjO8r3u8KOvoDtXZWIhaTN33A3SepHR/view?usp=sharing)

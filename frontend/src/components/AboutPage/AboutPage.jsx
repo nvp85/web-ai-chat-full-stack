@@ -5,12 +5,18 @@ export default function AboutPage() {
     return (
         <div id="about">
             <h1>About this app</h1>
-            <p>I built it as part of our JavaScript web development course to practice React and React Router. 
-            I was also curious to try out the OpenAI API. It’s a hot topic right now, and I wanted to explore
-             how it works in a real app.
-                The main idea was to keep the UI minimal and focus on core functionality, 
-                such as sending and receiving messages in a chat, and basic chat management 
-                like renaming and deleting chats.</p>
-        </div>
+            <p>This project is a full-stack web application built as part of the LaunchCode coding bootcamp to practice React and the Spring framework.
+                It offers a unified web interface for interacting with LLMs from different AI providers.
+                Currently, the app supports two LMMs: OpenAI gpt-4o-mini and Google's Gemini flash, so users can experiment without switching tools.</p>
+
+            <p>Core features include:</p>
+            <ul>
+                <li>Token-based authentication (no refresh tokens for simplicity)</li>
+
+                <li>Create and manage chats: start new conversations, rename or delete existing ones.</li>
+
+                <li>Automatically generated chat titles: the app attempts to generate a title from the first message, with a fallback if the API call fails.</li>
+            </ul> 
+        </div >
     )
 }

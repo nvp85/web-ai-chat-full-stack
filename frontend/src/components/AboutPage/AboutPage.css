@@ -4,7 +4,7 @@
     margin-right: 20%;
     max-width: 60%;
     height: 100%;
-    padding: 2rem;
+    padding: 5rem;
     box-shadow: 1rem 0rem 2rem lightgrey, -1rem 0rem 2rem lightgrey;
     
 }
@@ -12,6 +12,10 @@
 #about>p {
     text-align: justify;
     text-indent: 2rem;
+}
+
+#about>ul {
+    list-style-type: square;
 }
 
 #about > * {

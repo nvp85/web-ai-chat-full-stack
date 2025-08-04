@@ -31,7 +31,7 @@ Authentication/Authorization: [security-jwt library](https://github.com/bratkart
 
 ## ERDs
 
-![ERDs on Google Drive](https://drive.google.com/file/d/1HPdFyrj9XHg-c_zeY-l42cM2erZVPMZb/view?usp=sharing)
+![ERDs on Google Drive](https://drive.google.com/uc?id=1HPdFyrj9XHg-c_zeY-l42cM2erZVPMZb)
 
 ## Unsolved problems or future features
 

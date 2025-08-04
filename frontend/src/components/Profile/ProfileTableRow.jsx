@@ -2,12 +2,16 @@ import { useState, useRef, useEffect } from 'react';
 import { FiEdit3 } from "react-icons/fi";
 import { TiTickOutline } from "react-icons/ti";
 
+// Individual row of the table in the Profile component
+// It displays a user's field (username or email) and an edit button
 export default function ProfileTableRow(props) {
     const { field, value, saveChanges } = props;
     const [editing, setEditing] = useState(false);
     const [newValue, setNewValue] = useState(value);
-    const editImput = useRef();
+    // the ref is for focusing on the input field in the edit mode
+    const editImput = useRef(); 
 
+    // the actual logic is in the Profile component
     function handleSave() {
         saveChanges(field, newValue);
         setEditing(false);

@@ -2,6 +2,7 @@ package com.example.backend.services;
 
 import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
+import com.example.backend.models.LLModel;
 import com.example.backend.models.Message;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +28,7 @@ public class ChatService {
         this.openAiService = openAiService;
         this.googleAiService = googleAiService;
     }
-
+    // returns all user's chats by user's email
     public List<Chat> getAllChats(String email) {
         return chatRepository.findAllByUserEmail(email);
     }
@@ -51,17 +53,7 @@ public class ChatService {
         };
         newChat.addMessage(response);
         Chat chat = chatRepository.save(newChat);
-        String title = "Untitled";
-        try {
-            title = switch (newChat.getLlModel().getId()) {
-                case 1 -> openAiService.generateTitle(firstPrompt);
-                case 2 -> googleAiService.generateTitle(firstPrompt);
-                default -> throw new IllegalArgumentException("Unknown LLM");
-            };
-        } catch (Exception e) {
-            // title is optional
-            // if this call fails the chat just remains untitled
-        }
+        String title = generateChatTitle(firstPrompt, chat.getLlModel());
         chat.setTitle(title);
         chatRepository.save(chat);
         return chat;
@@ -72,6 +64,7 @@ public class ChatService {
                 .orElseThrow(() -> new NotFoundException("Chat not found with ID: " + chatId));
     }
 
+    // sends a prompt, gets a response and saves both into the DB
     public Message addPromptAndResponse(Chat chat, Message prompt) {
         chat.addMessage(prompt);
         Message response = switch (chat.getLlModel().getId()) {
@@ -101,5 +94,24 @@ public class ChatService {
 
     public void deleteChat(Chat chat) {
         chatRepository.deleteById(chat.getId());
+    }
+
+    // Attempts to generate a title with an LLM
+    // if the call fails returns first 5 words of the first prompt as a title
+    private String generateChatTitle(String firstPrompt, LLModel llm) {
+        String title = "Untitled";
+        try {
+            title = switch (llm.getId()) {
+                case 1 -> openAiService.generateTitle(firstPrompt);
+                case 2 -> googleAiService.generateTitle(firstPrompt);
+                default -> throw new IllegalArgumentException("Unknown LLM");
+            };
+        } catch (Exception e) {
+            String[] words = firstPrompt.trim().split("\\s+");
+            // takes 5 first words as a title
+            title = String.join(" ", Arrays.copyOf(words, Math.min(words.length, 5)));
+            title = words.length > 5 ? title + "..." : title;
+        }
+        return title;
     }
 }

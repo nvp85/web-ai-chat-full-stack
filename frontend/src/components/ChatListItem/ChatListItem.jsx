@@ -51,7 +51,7 @@ export default function ChatListItem({ chat, deleteChat, renameChat }) {
                 </form>)
             : (
                 <>
-                    <span className='chat-title'><NavLink to={`/chats/${chat.id}`} >{chat.title}</NavLink></span>
+                    <span className='chat-title' title={chat.title}><NavLink to={`/chats/${chat.id}`} >{chat.title}</NavLink></span>
                     <button onClick={openEditMode} className='icon-btn'><FiEdit3 /></button>
                     <button
                         onClick={() => deleteChat(chat)}

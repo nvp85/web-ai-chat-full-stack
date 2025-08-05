@@ -1,13 +1,14 @@
 import { NavLink, useNavigate } from "react-router";
 import './Navbar.css'
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from '../../hooks/useAuth';
 import { IoHomeOutline } from "react-icons/io5";
 import Hamburger from 'hamburger-react';
 
+// Displays nav bar menu 
 export default function Navbar() {
     const user = useAuth();
-    const isAuthenticated = user.currentUser ? true : false;
+    const isAuthenticated = user?.currentUser ? true : false;
     const [isMenuOpen, setIsMenuOpen] = useState();
     const menuRef = useRef();
     const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function Navbar() {
                     ? (<>
                         <NavLink to="chats" id="chats-link">Chats</NavLink>
                         {
-                            user.currentUser.username?.trim()
+                            user.currentUser?.username?.trim()
                                 ? <NavLink to="profile">Welcome, {user.currentUser.username}</NavLink>
                                 : <NavLink to="profile">Profile</NavLink>
                         }

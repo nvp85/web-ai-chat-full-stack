@@ -21,7 +21,7 @@ export default function AuthProvider({ children }) {
                 setCurrentUser({ username: userData.username, email: userData.email });
                 setInitialChats(userData.chats);
             } catch (err) {
-                if (err.message?.includes("token")) {
+                if (err.message === "Invalid credentials.") {
                     handleUnauthorized();
                 } else {
                     setError(err.message);

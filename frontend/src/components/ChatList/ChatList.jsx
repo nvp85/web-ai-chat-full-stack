@@ -42,7 +42,7 @@ export default function ChatList({ currentChatId = null }) {
                 setLoadingText(null);
             }
         } catch (err) {
-            if (err.message === "Invalid token.") {
+            if (err.message === "Invalid credentials.") {
                 handleUnauthorized(); // will navigate to the login page
                 return;
             }
@@ -51,7 +51,7 @@ export default function ChatList({ currentChatId = null }) {
                 setError("The chat was not found.");
                 fetchChats(); // to sync with the DB
             } else {
-                setError("Failed to delete the chat.");
+                setError(err.message);
             }
         }
     }
@@ -68,7 +68,7 @@ export default function ChatList({ currentChatId = null }) {
             const chat = await updateChatTitle(id, title, token);
             setChats(prev => [...prev.filter(chat => chat.id != id), chat]);
         } catch (err) {
-            if (err.message === "Invalid token.") {
+            if (err.message === "Invalid credentials.") {
                 handleUnauthorized(); // will navigate to the login page
                 return;
             }
@@ -76,7 +76,7 @@ export default function ChatList({ currentChatId = null }) {
                 setError("The chat was not found.");
                 fetchChats(); // to sync with the DB
             } else {
-                setError("Failed to update the title.");
+                setError(err.message);
             }
         }
         setLoadingText(null);

@@ -37,7 +37,7 @@ export default function Profile() {
                 setLoadingText(null);
             }
         } catch (err) {
-            if (err.message === "Invalid token.") {
+            if (err.message === "Invalid credentials.") {
                 // this function will send the user to the login page
                 handleUnauthorized(); 
             } else {

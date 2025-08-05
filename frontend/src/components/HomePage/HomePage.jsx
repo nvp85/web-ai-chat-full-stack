@@ -29,7 +29,7 @@ export default function HomePage() {
             return;
         }
         const chatId = crypto.randomUUID();
-        // temporary chat object that will be replaced by the returned from backend chat
+        // temporary chat object that will be replaced by the returned from the backend chat
         const chat = {
             id: chatId,
             title: "untitled",

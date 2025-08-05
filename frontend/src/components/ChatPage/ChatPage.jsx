@@ -50,12 +50,12 @@ export default function ChatPage() {
 					await fetchChats(); // sync with the DB
 				}
 			} catch (err) {
-				if (err.message === "Invalid token.") {
+				if (err.message === "Invalid credentials.") {
 					handleUnauthorized();
 				} else if (err.message === "Not found") {
 					setNotFound(true);
 				} else {
-					setError("Failed to fetch messages.");
+					setError(err.message);
 				}
 			} finally {
 				setLoading(false);
@@ -88,7 +88,7 @@ export default function ChatPage() {
 				setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]);
 				setMessages(prev => [...prev, { content: newChat.response, role }]);
 			} catch (err) {
-				if (err.message === "Invalid token.") {
+				if (err.message === "Invalid credentials.") {
 					handleUnauthorized(); // the user will be navigated to /login
 					return;
 				}
@@ -131,7 +131,7 @@ export default function ChatPage() {
 				response
 			]);
 		} catch (err) {
-			if (err.message === "Invalid token.") {
+			if (err.message === "Invalid credentials.") {
 				handleUnauthorized(); // the user will be navigated to /login
 				return;
 			}

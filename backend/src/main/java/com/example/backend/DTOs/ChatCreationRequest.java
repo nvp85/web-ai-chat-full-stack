@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// DTO to receive a chat obj and a first prompt at once
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

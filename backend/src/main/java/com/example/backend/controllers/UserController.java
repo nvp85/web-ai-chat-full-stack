@@ -12,8 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -24,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.CREATED) // register a new acc
     public void createUser(@RequestBody User user) throws EmailAlreadyExistsException {
         if (user.getEmail() == null || user.getPassword() == null) {
             throw new IllegalArgumentException("Email and password must not be null");
@@ -48,12 +46,6 @@ public class UserController {
                               @RequestBody User newProfile) throws EmailAlreadyExistsException {
         User user = userService.getUserByEmail(jwtUser.getUsername());
         userService.updateUserProfile(user, newProfile);
-    }
-
-    @GetMapping
-    @PreAuthorize("hasRole('ROLE_USER')") // TODO: remove this endpoint later
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)

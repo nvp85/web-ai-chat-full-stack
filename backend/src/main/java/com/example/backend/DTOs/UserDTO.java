@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+// this DTO is used to pass a user and their chats in one response
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

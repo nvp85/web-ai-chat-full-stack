@@ -53,6 +53,7 @@ export default function ChatPage() {
 				if (err.message === "Invalid credentials.") {
 					handleUnauthorized();
 				} else if (err.message === "Not found") {
+					await fetchChats();
 					setNotFound(true);
 				} else {
 					setError("Failed to fetch the messages: " + err.message);

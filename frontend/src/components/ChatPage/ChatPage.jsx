@@ -55,7 +55,7 @@ export default function ChatPage() {
 				} else if (err.message === "Not found") {
 					setNotFound(true);
 				} else {
-					setError(err.message);
+					setError("Failed to fetch the messages: " + err.message);
 				}
 			} finally {
 				setLoading(false);
@@ -92,7 +92,7 @@ export default function ChatPage() {
 					handleUnauthorized(); // the user will be navigated to /login
 					return;
 				}
-				setError(err.message);
+				setError("Failed to start the chat: " + err.message);
 				setChats(prev => prev.filter(chat => chat.id != id));
 			} finally {
 				setGenerating(false);
@@ -135,7 +135,7 @@ export default function ChatPage() {
 				handleUnauthorized(); // the user will be navigated to /login
 				return;
 			}
-			setError("Something went wrong. Response wasn't generated.");
+			setError("Response wasn't generated. " + err.message);
 		} finally {
 			setGenerating(false);
 		}

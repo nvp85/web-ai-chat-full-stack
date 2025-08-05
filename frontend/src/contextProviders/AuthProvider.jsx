@@ -24,7 +24,7 @@ export default function AuthProvider({ children }) {
                 if (err.message === "Invalid credentials.") {
                     handleUnauthorized();
                 } else {
-                    setError(err.message);
+                    setError("Failed to fetch user's data: " + err.message);
                 }
             } finally {
                 setLoading(false);
@@ -66,7 +66,7 @@ export default function AuthProvider({ children }) {
         await createUser(newUser);
     }
 
-    function handleUnauthorized(message = null) {
+    function handleUnauthorized() {
         // whenever we get 401 most likely it means the token has expired
         // there is no refresh tokens so the app should redirect the user
         // to the login page and show a message that they were logged out

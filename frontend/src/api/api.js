@@ -6,9 +6,9 @@
 const base_url = "http://localhost:8080";
 
 // API request - fetch wrapper (throws common errors)
-async function APIrequest(url, method, body, token) {
+async function APIrequest(url, method, bodyObj, token) {
     const authHeaders = token ? { 'Authorization': token } : {};
-    const body = body ? { body: JSON.stringify(body) } : {};
+    const body = bodyObj ? { body: JSON.stringify(bodyObj) } : {};
     const response = await fetch(url, {
         method: method,
         headers: {
@@ -54,7 +54,7 @@ const api_url = base_url + "/api";
 export async function getUserData(token) {
     const response = await APIrequest(api_url + "/users/me", "get", null, token);
     if (!response.ok) {
-        throw new Error("Failed to fetch user data.");
+        throw new Error("Something went wrong.");
     }
     const data = await response.json();
     return data;
@@ -113,7 +113,7 @@ export async function startChat(chatCreationObj, token) {
         throw new Error("The chat already exists.");
     }
     if (!response.ok) {
-        throw new Error("Failed to create a new chat.");
+        throw new Error("Something went wrong.");
     }
     const data = await response.json();
     return data; // returns the new chat obj and a LLM's response
@@ -140,7 +140,7 @@ export async function getChatMessages(chatId, token) {
     const url = `${api_url}/chats/${chatId}/messages`;
     const response = await APIrequest(url, "get", null, token);
     if (!response.ok) {
-        throw new Error("Failed to fetch the chat messages.");
+        throw new Error("Something went wrong.");
     }
     const data = await response.json();
     return data; // returns an array of messages

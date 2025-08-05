@@ -3,6 +3,7 @@ package com.example.backend.controllers;
 import com.example.backend.DTOs.ChatCreationRequest;
 import com.example.backend.DTOs.ChatCreationResponse;
 import com.example.backend.exceptions.ChatAlreadyExistsException;
+import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.*;
 import com.example.backend.services.ChatService;
@@ -29,19 +30,21 @@ public class ChatController {
         this.userService = userService;
     }
 
-    // Get all the chat that belong to the current user
+    // GET all chats that belong to the current user
+    // Endpoint http://localhost:8080/api/chats
     @GetMapping
     public List<Chat> getAllChats(@AuthenticationPrincipal JwtUser jwtUser) {
         // jwtUser username is the email of the user
         return chatService.getAllChats(jwtUser.getUsername());
     }
 
-    // creates a new chat from the request body
+    // POST a new chat from the request body chat creation obj
+    // Endpoint http://localhost:8080/api/chats
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ChatCreationResponse createChat(
             @AuthenticationPrincipal JwtUser jwtUser,
-            @RequestBody ChatCreationRequest chatCreationDTO) throws ChatAlreadyExistsException {
+            @RequestBody ChatCreationRequest chatCreationDTO) throws ChatAlreadyExistsException, NotFoundException {
         // ChatCreationDTO contains the chat object and the first prompt
         if (chatCreationDTO.getFirstPrompt() == null || chatCreationDTO.getFirstPrompt().isEmpty()) {
             throw new IllegalArgumentException("Prompt content must not be null or empty");
@@ -53,7 +56,8 @@ public class ChatController {
         return new ChatCreationResponse(chat, chat.getMessages().getLast().getContent());
     }
 
-    // Get chat by id without its messages
+    // GET a chat by id without its messages
+    // Endpoint example: http://localhost:8080/api/chats/fa1b85c1-8216-418e-8a53-5014ba3b3aa6
     @GetMapping("/{chatId}")
     public Chat getChatById(
             @AuthenticationPrincipal JwtUser jwtUser,
@@ -62,17 +66,19 @@ public class ChatController {
         return chatService.getChatOrThrow(chatId, jwtUser.getUsername());
     }
 
-    // I would use PATCH here but the project requirements say PUT
+    // PUT (update) a chat's title
+    // Endpoint example: http://localhost:8080/api/chats/fa1b85c1-8216-418e-8a53-5014ba3b3aa6
     @PutMapping("/{chatId}")
     public Chat updateChatTitle(
             @AuthenticationPrincipal JwtUser jwtUser,
             @PathVariable UUID chatId, @RequestBody Chat newTitle) throws NotFoundException {
         // we need only the title from the request body Chat object
-        // getChatOrThrow will return the chat only if it belongs to the curr user
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         return chatService.updateChatTitle(chat, newTitle.getTitle()); // return updated chat
     }
 
+    // DELETE a chat by id
+    // Endpoint example: http://localhost:8080/api/chats/fa1b85c1-8216-418e-8a53-5014ba3b3aa6
     @DeleteMapping("/{chatId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteChat(
@@ -82,6 +88,8 @@ public class ChatController {
         chatService.deleteChat(chat);
     }
 
+    // GET a chat's messages by id
+    // Endpoint example: http://localhost:8080/api/chats/fa1b85c1-8216-418e-8a53-5014ba3b3aa6/messages
     @GetMapping("/{chatId}/messages")
     public List<Message> getChatMessages(
             @AuthenticationPrincipal JwtUser jwtUser,
@@ -91,12 +99,13 @@ public class ChatController {
         return chat.getMessages();
     }
 
+    // POST a message to a chat
+    // Endpoint example: http://localhost:8080/api/chats/fa1b85c1-8216-418e-8a53-5014ba3b3aa6/messages
     @PostMapping("/{chatId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
     public Message promptAndGetResponse(
             @AuthenticationPrincipal JwtUser jwtUser,
             @PathVariable UUID chatId, @RequestBody Message prompt) throws NotFoundException {
-        // validate ownership
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());
         prompt.setRole("user");
         if (prompt.getContent() == null || prompt.getContent().isEmpty()) {
@@ -105,13 +114,8 @@ public class ChatController {
         return chatService.addPromptAndResponse(chat, prompt);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(NotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    @ExceptionHandler(ChatAlreadyExistsException.class)
+    public ResponseEntity<String> handleChatAlreadyExistsException(EmailAlreadyExistsException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }

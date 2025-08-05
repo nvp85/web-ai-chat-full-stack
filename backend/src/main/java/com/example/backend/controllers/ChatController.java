@@ -36,12 +36,16 @@ public class ChatController {
         return chatService.getAllChats(jwtUser.getUsername());
     }
 
+    // creates a new chat from the request body
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ChatCreationResponse createChat(
             @AuthenticationPrincipal JwtUser jwtUser,
             @RequestBody ChatCreationRequest chatCreationDTO) throws ChatAlreadyExistsException {
         // ChatCreationDTO contains the chat object and the first prompt
+        if (chatCreationDTO.getFirstPrompt() == null || chatCreationDTO.getFirstPrompt().isEmpty()) {
+            throw new IllegalArgumentException("Prompt content must not be null or empty");
+        }
         User user = userService.getUserByEmail(jwtUser.getUsername());
         Chat newChat = chatCreationDTO.getChat();
         newChat.setUser(user);

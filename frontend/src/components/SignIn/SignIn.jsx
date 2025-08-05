@@ -15,7 +15,7 @@ export default function SignIn() {
         password: "qwerty"
     });
     const [showPassword, setShowPassword] = useState(false);
-    const auth = useAuth(); // authError will be displayed in a modal
+    const auth = useAuth(); 
     const [error, setError] = useState(""); // Form error
     const navigate = useNavigate();
     // the state for the loading message
@@ -88,11 +88,6 @@ export default function SignIn() {
                 </form>
 
             </div>
-            {auth.authError && auth.authError.includes("expired") &&
-                <ErrorModal onClose={() => auth.setAuthError(null)}>
-                <p>{auth.authError}</p>
-                </ErrorModal>
-            }
             {loadingText &&
                 <LoadingMessage text={loadingText} />
             }

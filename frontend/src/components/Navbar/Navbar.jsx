@@ -4,8 +4,11 @@ import { useState, useRef } from "react";
 import { useAuth } from '../../hooks/useAuth';
 import { IoHomeOutline } from "react-icons/io5";
 import Hamburger from 'hamburger-react';
+import ErrorModal from "../Modal/ErrorModal";
 
 // Displays nav bar menu 
+// Since nav bar is always displayed 
+// it also shows the message when user's access token is expired
 export default function Navbar() {
     const user = useAuth();
     const isAuthenticated = user?.currentUser ? true : false;
@@ -17,7 +20,7 @@ export default function Navbar() {
         navigate("/");
         user.logout();
     }
-    
+
     return (
         <nav>
             <div className="nav-links">
@@ -63,6 +66,11 @@ export default function Navbar() {
                         </div>}
                 </div>
             </div>
+            {user.authError && user.authError.includes("expired") &&
+                <ErrorModal onClose={() => user.setAuthError(null)}>
+                    <p>{user.authError}</p>
+                </ErrorModal>
+            }
         </nav>
     )
 }

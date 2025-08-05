@@ -15,6 +15,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
+    @Column(nullable = false)
     private String password; // Password is stored securely (hashed)
     @Column(unique=true, nullable = false)
     private String email;

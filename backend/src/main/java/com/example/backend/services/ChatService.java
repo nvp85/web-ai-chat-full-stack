@@ -43,7 +43,6 @@ public class ChatService {
             throw new ChatAlreadyExistsException();
         }
         newChat.setMessages(new ArrayList<Message>());
-        // the instruction was moved to the AI services
         Message firstMessage = new Message(firstPrompt, "user");
         newChat.addMessage(firstMessage);
         Message response = switch (newChat.getLlModel().getId()) {

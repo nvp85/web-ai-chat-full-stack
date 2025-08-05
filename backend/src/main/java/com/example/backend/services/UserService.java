@@ -3,6 +3,7 @@ package com.example.backend.services;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.models.User;
 import com.example.backend.repositories.UserRepository;
+import com.example.backend.exceptions.NotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ public class UserService {
     }
 
     public void updateUserProfile(User user, User newProfile) throws EmailAlreadyExistsException {
+        // username can be blank; it doesn't matter
         if (newProfile.getUsername() != null) {
             user.setUsername(newProfile.getUsername());
         }
@@ -49,20 +51,18 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public User getUserByEmail(String email) {
+    public User getUserByEmail(String email) throws NotFoundException {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
     }
 
+    // password validator
     public boolean isPasswordValid(String password) {
         String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$";
         return password.matches(pattern);
     }
 
+    // email validator
     public boolean isEmailValid(String email) {
         String pattern = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         return email.matches(pattern);

@@ -10,7 +10,7 @@ import { PiSpinnerGap } from "react-icons/pi";
 import Modal from '../Modal/Modal';
 import NotFound from "../NotFound";
 import { useChatList } from "../../hooks/useChatList";
-import { startChat, getChatMessages } from "../../api/api";
+import { startChat, getChatMessages, getChatById } from "../../api/api";
 
 // This component displays the currently open chat and a side bar with the chat list on the left side
 // manages the chat
@@ -139,6 +139,11 @@ export default function ChatPage() {
 			setError("Response wasn't generated. " + err.message);
 		} finally {
 			setGenerating(false);
+		}
+		try {
+			const updatedChat = await getChatById(id, token);
+			setChats(prev => [...prev.filter(c => c.id !== id), updatedChat]);
+		} catch {// do nothing
 		}
 	}
 	// scroll to the bottom of the chat

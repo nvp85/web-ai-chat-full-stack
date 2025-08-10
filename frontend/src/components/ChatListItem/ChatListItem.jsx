@@ -40,9 +40,9 @@ export default function ChatListItem({ chat, deleteChat, renameChat }) {
     function getProviderIcon(chat) {
         switch (chat.llModel.provider) {
             case "OpenAI":
-                return <RiOpenaiFill />;
+                return <RiOpenaiFill size="2rem"/>;
             case "Google":
-                return <RiGoogleFill />;
+                return <RiGoogleFill size="2rem"/>;
         }
     }
 

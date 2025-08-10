@@ -3,6 +3,8 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { FiEdit3 } from "react-icons/fi";
 import { useState, useEffect, useRef } from 'react';
 import { TiTickOutline } from "react-icons/ti";
+import { RiOpenaiFill } from "react-icons/ri";
+import { RiGoogleFill } from "react-icons/ri";
 
 // individual chat list item
 export default function ChatListItem({ chat, deleteChat, renameChat }) {
@@ -35,7 +37,19 @@ export default function ChatListItem({ chat, deleteChat, renameChat }) {
         }
     }, [editing])
 
+    function getProviderIcon(chat) {
+        switch (chat.llModel.provider) {
+            case "OpenAI":
+                return <RiOpenaiFill />;
+            case "Google":
+                return <RiGoogleFill />;
+        }
+    }
+
     return (<li className='chat-list-item'>
+        {
+            getProviderIcon(chat)
+        }
         {editing
             ? (
                 <form onSubmit={handleSubmit}>

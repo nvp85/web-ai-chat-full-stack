@@ -52,14 +52,14 @@ export default function ChatListItem({ chat, deleteChat, renameChat }) {
         }
         {editing
             ? (
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className='input-title-form'>
                     <input
                         name='newTitle'
                         value={newTitle}
                         onChange={(e) => setNewTitle(e.target.value)}
                         onBlur={exitEditMode}
                         ref={editImput}
-                        maxLength="50"
+                        maxLength="150"
                     />
                     <button type="submit" className='icon-btn'><TiTickOutline size="2rem" /></button>
                 </form>)

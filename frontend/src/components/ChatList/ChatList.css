@@ -13,6 +13,10 @@ ul {
     align-self: left;
 }
 
+.input-title-form {
+    display: inline;
+}
+
 li>span>a {
     margin: 0.3rem;
     text-decoration: none;

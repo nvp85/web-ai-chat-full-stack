@@ -4,10 +4,8 @@
 
 ul {
     list-style-type: none;
-    text-align: left;
-    margin-left: 2rem;
+    text-align: center;
     padding: 0rem;
-    margin-right: auto;
 }
 
 .chat-list-item {
@@ -27,8 +25,8 @@ li>span>a {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 70%;
-    max-width: 70%;
+    min-width: 64%;
+    max-width: 64%;
 }
 
 li>span>a.active {
@@ -38,12 +36,6 @@ li>span>a.active {
 
 li>span>a:hover {
     text-decoration: underline;
-}
-
-.list-title {
-    width: 50%;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .filter-btn {

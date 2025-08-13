@@ -50,6 +50,7 @@ public class Chat {
 
     public void addMessage(Message message) {
         messages.add(message);
+        updateLastModified();
         message.setChat(this); // Set the chat for the message
     }
 }

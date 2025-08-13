@@ -4,15 +4,17 @@
 
 ul {
     list-style-type: none;
-    text-align: left;
-    margin-left: 2rem;
+    text-align: center;
     padding: 0rem;
-    margin-right: auto;
 }
 
 .chat-list-item {
     margin-left: 2rem;
     align-self: left;
+}
+
+.input-title-form {
+    display: inline;
 }
 
 li>span>a {
@@ -27,8 +29,8 @@ li>span>a {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 70%;
-    max-width: 70%;
+    min-width: 64%;
+    max-width: 64%;
 }
 
 li>span>a.active {
@@ -40,8 +42,20 @@ li>span>a:hover {
     text-decoration: underline;
 }
 
-.list-title {
-    width: 50%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.filter-btn {
+    background-color: white;
+    padding: 0;
+    margin: 0.5rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+}
+
+.filter-btn:hover {
+    transform: translate(5%);
+}
+
+#filter-btn-container {
+    display: flex;
+    justify-content: center;
 }

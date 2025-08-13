@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.DTOs.ChatDTO;
 import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.LLModel;
@@ -38,7 +39,7 @@ public class ChatService {
     // because otherwise it was possible to have several chat creation requests with the same id
     // one after another and the last one got actually saved in the DB.
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Chat createChat(Chat newChat, String firstPrompt) throws ChatAlreadyExistsException {
+    public ChatDTO createChat(Chat newChat, String firstPrompt) throws ChatAlreadyExistsException {
         if (chatRepository.existsById(newChat.getId())) {
             throw new ChatAlreadyExistsException();
         }
@@ -55,7 +56,7 @@ public class ChatService {
         String title = generateChatTitle(firstPrompt, chat.getLlModel());
         chat.setTitle(title);
         chatRepository.save(chat);
-        return chat;
+        return new ChatDTO(chat, response);
     }
 
     public Chat getChatById(UUID chatId) throws NotFoundException{
@@ -64,7 +65,7 @@ public class ChatService {
     }
 
     // sends a prompt, gets a response and saves both into the DB
-    public Message addPromptAndResponse(Chat chat, Message prompt) {
+    public ChatDTO addPromptAndResponse(Chat chat, Message prompt) {
         chat.addMessage(prompt);
         Message response = switch (chat.getLlModel().getId()) {
             case 1 -> openAiService.getResponse(chat.getMessages());
@@ -72,8 +73,7 @@ public class ChatService {
             default -> throw new IllegalArgumentException("Unknown LLM");
         };
         chat.addMessage(response);
-        chatRepository.save(chat);
-        return response;
+        return new ChatDTO(chatRepository.save(chat), response);
     }
 
     // returns the chat if it belongs to the user, otherwise throws an exception

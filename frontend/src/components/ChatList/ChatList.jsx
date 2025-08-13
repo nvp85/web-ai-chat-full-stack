@@ -8,6 +8,8 @@ import { updateChatTitle, deleteChat } from "../../api/api";
 import { PiSpinnerGap } from "react-icons/pi";
 import './ChatList.css';
 import LoadingMessage from '../LoadingMessage/LoadingMessage';
+import { RiOpenaiFill } from "react-icons/ri";
+import { RiGoogleFill } from "react-icons/ri";
 
 // This component displays the list of chats,
 // handles renaming and deletion of a chat
@@ -16,7 +18,7 @@ export default function ChatList({ currentChatId = null }) {
     // chats is an array of chat objects 
     const { token, handleUnauthorized } = useAuth();
     const { chats, setChats, fetchChats, chatsLoading, chatsError, setChatsError } = useChatList();
-    const displayedChats = chats?.toSorted((a, b) => b.lastModified - a.lastModified);
+    let displayedChats = chats?.toSorted((a, b) => b.lastModified - a.lastModified);
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     // the text for the loading message that is displayed when an API call is in progress
@@ -26,6 +28,12 @@ export default function ChatList({ currentChatId = null }) {
     const [currChat, setCurrChat] = useState(null);
 
     const [error, setError] = useState("");
+
+    // filter the list by model
+    const [filter, setFilter] = useState(null);
+    if (filter) {
+        displayedChats = displayedChats.filter(chat => chat.llModel.provider === filter);
+    }
 
     // sends the chat deletion request
     async function handleDelete(id) {
@@ -105,6 +113,27 @@ export default function ChatList({ currentChatId = null }) {
     return (
         <div id="chat-list">
             <h3>Your chats</h3>
+            <div id="filter-btn-container">
+                <button
+                    className='filter-btn'
+                    onClick={() => setFilter("OpenAI")}
+                    style={{ backgroundColor: filter === "OpenAI" ? 'aquamarine' : 'white' }}
+                >
+                    <RiOpenaiFill size="2rem" />
+                </button>
+                <button
+                    className='filter-btn'
+                    onClick={() => setFilter("Google")}
+                    style={{ backgroundColor: filter === "Google" ? 'aquamarine' : 'white' }}
+                >
+                    <RiGoogleFill size="2rem" />
+                </button>
+                <button
+                    className='filter-btn'
+                    onClick={() => setFilter(null)}
+                    style={{ backgroundColor: filter === null ? 'aquamarine' : 'white' }}
+                >All</button>
+            </div>
             <ul>
                 {displayedChats?.length > 0
                     ? displayedChats.map(chat => <ChatListItem chat={chat} key={chat.id} deleteChat={confirmDelete} renameChat={renameChat} />)

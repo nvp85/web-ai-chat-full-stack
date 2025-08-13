@@ -39,7 +39,7 @@ public class ChatService {
     // because otherwise it was possible to have several chat creation requests with the same id
     // one after another and the last one got actually saved in the DB.
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Chat createChat(Chat newChat, String firstPrompt) throws ChatAlreadyExistsException {
+    public ChatDTO createChat(Chat newChat, String firstPrompt) throws ChatAlreadyExistsException {
         if (chatRepository.existsById(newChat.getId())) {
             throw new ChatAlreadyExistsException();
         }
@@ -56,7 +56,7 @@ public class ChatService {
         String title = generateChatTitle(firstPrompt, chat.getLlModel());
         chat.setTitle(title);
         chatRepository.save(chat);
-        return chat;
+        return new ChatDTO(chat, response);
     }
 
     public Chat getChatById(UUID chatId) throws NotFoundException{
@@ -73,7 +73,7 @@ public class ChatService {
             default -> throw new IllegalArgumentException("Unknown LLM");
         };
         chat.addMessage(response);
-        return new ChatDTO(chatRepository.save(chat), response.getContent());
+        return new ChatDTO(chatRepository.save(chat), response);
     }
 
     // returns the chat if it belongs to the user, otherwise throws an exception

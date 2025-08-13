@@ -45,14 +45,15 @@ public class ChatController {
             @AuthenticationPrincipal JwtUser jwtUser,
             @RequestBody ChatDTO chatCreationDTO) throws ChatAlreadyExistsException, NotFoundException {
         // ChatCreationDTO contains the chat object and the first prompt
-        if (chatCreationDTO.getMessage() == null || chatCreationDTO.getMessage().isEmpty()) {
+        if ((chatCreationDTO.getMessage() == null) ||
+                (chatCreationDTO.getMessage().getContent() == null) ||
+                chatCreationDTO.getMessage().getContent().isEmpty()) {
             throw new IllegalArgumentException("Prompt content must not be null or empty");
         }
         User user = userService.getUserByEmail(jwtUser.getUsername());
         Chat newChat = chatCreationDTO.getChat();
         newChat.setUser(user);
-        Chat chat = chatService.createChat(newChat, chatCreationDTO.getMessage());
-        return new ChatDTO(chat, chat.getMessages().getLast().getContent());
+        return chatService.createChat(newChat, chatCreationDTO.getMessage().getContent());
     }
 
     // GET a chat by id without its messages

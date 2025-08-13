@@ -77,17 +77,16 @@ export default function ChatPage() {
 					id: id,
 					llModel: chat?.llModel
 				},
-				firstPrompt: firstMessage.current.content
+				message: firstMessage.current
 			}
 			firstMessage.current = null;
 			window.history.replaceState({}, ''); // removes the first message from the history
-			// TODO: this needs to be handled in a uniform way
-			const role = newChat.chat.llModel.id === 1 ? "assistant" : "model";
 			setGenerating(true);
 			try { // sends a new chat request
+				// new chat is a DTO obj {chat, message}
 				newChat = await startChat(newChat, token);
 				setChats(prev => [...prev.filter(chat => chat.id != id), newChat.chat]);
-				setMessages(prev => [...prev, { content: newChat.response, role }]);
+				setMessages(prev => [...prev, newChat.message]);
 			} catch (err) {
 				if (err.message === "Invalid credentials.") {
 					handleUnauthorized(); // the user will be navigated to /login
@@ -126,11 +125,13 @@ export default function ChatPage() {
 		try {
 			setMessages(prev => [...prev, newMessage]);
 			setGenerating(true);
+			// the response is a chatDTO
 			const response = await sendMessage(id, userInput, token);
 			setMessages(prev => [
 				...prev,
-				response
+				response.message
 			]);
+			setChats(prev => [...prev.filter(c => c.id !== id), response.chat]);
 		} catch (err) {
 			if (err.message === "Invalid credentials.") {
 				handleUnauthorized(); // the user will be navigated to /login
@@ -139,11 +140,6 @@ export default function ChatPage() {
 			setError("Response wasn't generated. " + err.message);
 		} finally {
 			setGenerating(false);
-		}
-		try {
-			const updatedChat = await getChatById(id, token);
-			setChats(prev => [...prev.filter(c => c.id !== id), updatedChat]);
-		} catch {// do nothing
 		}
 	}
 	// scroll to the bottom of the chat

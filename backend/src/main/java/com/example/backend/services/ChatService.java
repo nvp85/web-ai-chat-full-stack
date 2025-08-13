@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.DTOs.ChatDTO;
 import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.LLModel;
@@ -64,7 +65,7 @@ public class ChatService {
     }
 
     // sends a prompt, gets a response and saves both into the DB
-    public Message addPromptAndResponse(Chat chat, Message prompt) {
+    public ChatDTO addPromptAndResponse(Chat chat, Message prompt) {
         chat.addMessage(prompt);
         Message response = switch (chat.getLlModel().getId()) {
             case 1 -> openAiService.getResponse(chat.getMessages());
@@ -72,8 +73,7 @@ public class ChatService {
             default -> throw new IllegalArgumentException("Unknown LLM");
         };
         chat.addMessage(response);
-        chatRepository.save(chat);
-        return response;
+        return new ChatDTO(chatRepository.save(chat), response.getContent());
     }
 
     // returns the chat if it belongs to the user, otherwise throws an exception

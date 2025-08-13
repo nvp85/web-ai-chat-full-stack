@@ -1,7 +1,6 @@
 package com.example.backend.controllers;
 
-import com.example.backend.DTOs.ChatCreationRequest;
-import com.example.backend.DTOs.ChatCreationResponse;
+import com.example.backend.DTOs.ChatDTO;
 import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.EmailAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
@@ -42,18 +41,18 @@ public class ChatController {
     // Endpoint http://localhost:8080/api/chats
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ChatCreationResponse createChat(
+    public ChatDTO createChat(
             @AuthenticationPrincipal JwtUser jwtUser,
-            @RequestBody ChatCreationRequest chatCreationDTO) throws ChatAlreadyExistsException, NotFoundException {
+            @RequestBody ChatDTO chatCreationDTO) throws ChatAlreadyExistsException, NotFoundException {
         // ChatCreationDTO contains the chat object and the first prompt
-        if (chatCreationDTO.getFirstPrompt() == null || chatCreationDTO.getFirstPrompt().isEmpty()) {
+        if (chatCreationDTO.getMessage() == null || chatCreationDTO.getMessage().isEmpty()) {
             throw new IllegalArgumentException("Prompt content must not be null or empty");
         }
         User user = userService.getUserByEmail(jwtUser.getUsername());
         Chat newChat = chatCreationDTO.getChat();
         newChat.setUser(user);
-        Chat chat = chatService.createChat(newChat, chatCreationDTO.getFirstPrompt());
-        return new ChatCreationResponse(chat, chat.getMessages().getLast().getContent());
+        Chat chat = chatService.createChat(newChat, chatCreationDTO.getMessage());
+        return new ChatDTO(chat, chat.getMessages().getLast().getContent());
     }
 
     // GET a chat by id without its messages
@@ -103,7 +102,7 @@ public class ChatController {
     // Endpoint example: http://localhost:8080/api/chats/fa1b85c1-8216-418e-8a53-5014ba3b3aa6/messages
     @PostMapping("/{chatId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
-    public Message promptAndGetResponse(
+    public ChatDTO promptAndGetResponse(
             @AuthenticationPrincipal JwtUser jwtUser,
             @PathVariable UUID chatId, @RequestBody Message prompt) throws NotFoundException {
         Chat chat = chatService.getChatOrThrow(chatId, jwtUser.getUsername());

@@ -7,10 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 // DTO to receive a chat obj and a first prompt at once
+// and to pass a chat obj and an LLM response at once
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatCreationRequest {
+public class ChatDTO {
     private Chat chat;
-    private String firstPrompt;
+    private String message;
 }

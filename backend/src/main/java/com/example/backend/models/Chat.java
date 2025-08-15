@@ -4,23 +4,29 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Indexed
 @Data // Lombok will generate getters, setters, toString, equals, and hashCode methods
 @NoArgsConstructor // Lombok will generate a no-args constructor
 public class Chat {
     @Id
     private UUID id; // Unique identifier for the chat (comes from the frontend)
 
+    @IndexedEmbedded(includePaths = "email")
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // The user who owns the chat
 
+    @FullTextField
     private String title;
     private long lastModified; // Timestamp in milliseconds
 

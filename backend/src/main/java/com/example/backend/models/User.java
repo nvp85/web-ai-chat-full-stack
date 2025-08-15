@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class User {
     private String username;
     @Column(nullable = false)
     private String password; // Password is stored securely (hashed)
+    @KeywordField
     @Column(unique=true, nullable = false)
     private String email;
 

@@ -175,3 +175,14 @@ export function getLLMs() {
     },
     ]
 }
+
+export async function searchMessages(query) {
+    const url = `${api_url}/messages/search?q=${query}`;
+    const response = await APIrequest(url, "get", null, null);
+    if (!response.ok) {
+        throw new Error("Something went wrong.");
+    }
+    const data = await response.json();
+    return data; // list of messages
+
+}

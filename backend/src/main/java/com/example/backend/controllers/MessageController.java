@@ -18,8 +18,8 @@ public class MessageController {
         this.searchService = searchService;
     }
 
-    @GetMapping
+    @GetMapping("/search")
     public List<Message> searchMessages(@RequestParam(name="q", required = true) String query) {
-        return searchService.search(query);
+        return searchService.searchVector(query);
     }
 }

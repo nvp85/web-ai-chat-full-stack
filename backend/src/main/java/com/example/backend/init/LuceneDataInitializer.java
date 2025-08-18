@@ -44,7 +44,6 @@ public class LuceneDataInitializer implements CommandLineRunner {
         int i = 0;
         for (Message m : messages) {
             m.setEmbedding(embeddings.get(i));
-            m.setOwnerEmail("demo@example.com");
             searchSession.indexingPlan().addOrUpdate(m);
             i++;
         }

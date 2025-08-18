@@ -25,12 +25,25 @@ public class SearchService {
         float[] queryEmbeddingsVector = openAiService.embed(Collections.singletonList(new Message(query, "user"))).getFirst();
         SearchSession searchSession = Search.session(entityManager);
         SearchResult<Message> result = searchSession.search(Message.class)
-                .where(f -> f.knn(5)
+                .where(f -> f.knn(200)
                         .field("embedding")
                         .matching(queryEmbeddingsVector)
-                        .requiredMinimumScore(0.5f)
+                        .requiredMinimumScore(0.61f)
                 )
-                .fetch(10);
+                .fetch(5);
+        List<Message> hits = result.hits();
+        return hits;
+    }
+
+    @Transactional
+    public List<Message> searchText(String query) {
+        SearchSession searchSession = Search.session(entityManager);
+        SearchResult<Message> result = searchSession.search(Message.class)
+                .where(f -> f.match()
+                        .fields("content")
+                        .matching(query)
+                )
+                .fetch(5);
         List<Message> hits = result.hits();
         return hits;
     }

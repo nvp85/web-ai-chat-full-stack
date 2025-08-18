@@ -1,5 +1,6 @@
 package com.example.backend.controllers;
 
+import com.example.backend.DTOs.SearchResultDTO;
 import com.example.backend.models.Message;
 import com.example.backend.services.SearchService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,15 @@ public class MessageController {
     }
 
     @GetMapping("/search")
-    public List<Message> searchMessages(@RequestParam(name="q", required = true) String query) {
-        return searchService.searchVector(query);
+    public List<SearchResultDTO> searchMessages(
+            @RequestParam(name="q", required = true) String query,
+            @RequestParam(name = "type", required = true) String type
+    ) {
+        List<Message> result = switch (type) {
+            case "text" -> searchService.searchText(query);
+            case "vector" -> searchService.searchVector(query);
+            default -> throw new IllegalArgumentException("Unknown search type.");
+        };
+        return result.stream().map(m -> new SearchResultDTO(m, m.getChat().getId(), m.getChat().getTitle())).toList();
     }
 }

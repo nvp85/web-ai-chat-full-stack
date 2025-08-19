@@ -4,6 +4,7 @@ import com.example.backend.Events.MessagesCreatedEvent;
 import com.example.backend.models.Message;
 import com.example.backend.repositories.MessageRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
@@ -22,7 +23,7 @@ public class MessageService {
     private final MessageRepository repo;
     private final OpenAiService openAiService;
 
-    private EntityManager entityManager;
+    @PersistenceContext private EntityManager entityManager;
 
     // method - event listener for setting embeddings for new messages
     @Async
@@ -38,6 +39,5 @@ public class MessageService {
             searchSession.indexingPlan().addOrUpdate(m);
             i++;
         }
-        System.out.println("set embeddings for " + messages.getFirst().getContent());
     }
 }

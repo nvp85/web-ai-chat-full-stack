@@ -2,19 +2,21 @@ import { useState } from "react";
 import { searchMessages } from "../../api/api";
 import "./SearchPage.css";
 import { NavLink } from "react-router";
+import { useAuth } from "../../hooks/useAuth";
 
 
 export default function SearchPage() {
     const [searchResult, setSearchResult] = useState(null);
     const [query, setQuery] = useState("");
     const [searchType, setSearchType] = useState("text");
+    const {token} = useAuth();
 
     async function search(e) {
         e.preventDefault();
         if (query.length < 3) {
             return;
         }
-        const messages = await searchMessages(query, searchType);
+        const messages = await searchMessages(query, searchType, token);
         setSearchResult(messages);
     }
 

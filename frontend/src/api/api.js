@@ -176,9 +176,9 @@ export function getLLMs() {
     ]
 }
 
-export async function searchMessages(query, type) {
+export async function searchMessages(query, type, token) {
     const url = `${api_url}/messages/search?q=${query}&type=${type}`;
-    const response = await APIrequest(url, "get", null, null);
+    const response = await APIrequest(url, "get", null, token);
     if (!response.ok) {
         throw new Error("Something went wrong.");
     }

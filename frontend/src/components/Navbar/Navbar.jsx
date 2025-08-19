@@ -31,6 +31,7 @@ export default function Navbar() {
                 {isAuthenticated
                     ? (<>
                         <NavLink to="chats" id="chats-link">Chats</NavLink>
+                        <NavLink to="search">Search</NavLink>
                         {
                             user.currentUser?.username?.trim()
                                 ? <NavLink to="profile">Welcome, {user.currentUser.username}</NavLink>
@@ -55,6 +56,7 @@ export default function Navbar() {
                             {isAuthenticated
                                 ? (<>
                                     <NavLink to="chats" id="chats-link">Chats</NavLink>
+                                    <NavLink to="search">Search</NavLink>
                                     <NavLink to="profile">Profile</NavLink>
                                     <button onClick={handleLogout} className="btn">Logout</button>
                                 </>)

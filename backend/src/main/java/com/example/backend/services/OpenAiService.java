@@ -4,7 +4,12 @@ import com.example.backend.models.Message;
 import com.openai.client.OpenAIClient;
 import com.openai.models.ChatModel;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.embeddings.Embedding;
+import com.openai.models.embeddings.EmbeddingCreateParams;
+import com.openai.models.embeddings.EmbeddingModel;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 import java.util.List;
 
 // This service is responsible for interaction with GPT via OpenAI SDK
@@ -12,6 +17,7 @@ import java.util.List;
 public class OpenAiService {
     private final OpenAIClient openAIClient;
     private final ChatModel chatModel = ChatModel.GPT_4O_MINI;
+    private final EmbeddingModel embeddingModel = EmbeddingModel.TEXT_EMBEDDING_3_SMALL;
 
     public OpenAiService(OpenAIClient openAIClient) {
         this.openAIClient = openAIClient;
@@ -48,5 +54,22 @@ public class OpenAiService {
         ChatCompletionCreateParams params = b.build();
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();
         return response;
+    }
+
+    public List<float[]> embed(List<Message> messages) {
+        EmbeddingCreateParams.Builder b = EmbeddingCreateParams.builder().model(embeddingModel);
+        b.inputOfArrayOfStrings(messages.stream().map(Message::getContent).toList());
+        b.dimensions(768);
+        EmbeddingCreateParams params = b.build();
+        List<Embedding> response = openAIClient.embeddings().create(params).data();
+        return response.stream().map(em -> {
+                    List<Float> embeddings = em.embedding();
+                    float[] arr = new float[embeddings.size()];
+                    for (int i=0; i < embeddings.size(); i++) {
+                        arr[i] = embeddings.get(i);
+                    }
+                    return  arr;
+                }
+                ).toList();
     }
 }

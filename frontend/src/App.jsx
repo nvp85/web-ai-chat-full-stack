@@ -13,6 +13,7 @@ import ProtectedRoutes from "./components/ProtectedRoutes/ProtectedRoutes";
 import NotFound from "./components/NotFound";
 import ChatListProvider from './contextProviders/ChatListProvider';
 import RootErrorBoundary from "./errorBoundaries/RootErrorBoundary";
+import SearchPage from "./components/SearchPage/SearchPage";
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
                                     <Route path="chats/:id" element={<ChatPage />} />
                                     <Route path="chats" element={<ChatList />} />
                                     <Route path="profile" element={<Profile />} />
+                                    <Route path="search" element={<SearchPage />} />
                                 </Route>
                                 <Route path="*" element={<NotFound />} />
                             </Route>

@@ -1,10 +1,13 @@
 package com.example.backend.services;
 
 import com.example.backend.DTOs.ChatDTO;
+import com.example.backend.Events.MessagesCreatedEvent;
 import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.LLModel;
 import com.example.backend.models.Message;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import com.example.backend.repositories.ChatRepository;
@@ -18,17 +21,14 @@ import java.util.List;
 import java.util.UUID;
 
 // This service contains the business logic for working with chats
+@RequiredArgsConstructor
 @Service
 public class ChatService {
     private final ChatRepository chatRepository;
     private final OpenAiService openAiService;
     private final GoogleAiService googleAiService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public ChatService(ChatRepository chatRepository, OpenAiService openAiService, GoogleAiService googleAiService) {
-        this.chatRepository = chatRepository;
-        this.openAiService = openAiService;
-        this.googleAiService = googleAiService;
-    }
     // returns all user's chats by user's email
     public List<Chat> getAllChats(String email) {
         return chatRepository.findAllByUserEmail(email);
@@ -56,6 +56,7 @@ public class ChatService {
         String title = generateChatTitle(firstPrompt, chat.getLlModel());
         chat.setTitle(title);
         chatRepository.save(chat);
+        applicationEventPublisher.publishEvent(new MessagesCreatedEvent(this, chat.getMessages()));
         return new ChatDTO(chat, response);
     }
 
@@ -65,6 +66,7 @@ public class ChatService {
     }
 
     // sends a prompt, gets a response and saves both into the DB
+    @Transactional
     public ChatDTO addPromptAndResponse(Chat chat, Message prompt) {
         chat.addMessage(prompt);
         Message response = switch (chat.getLlModel().getId()) {
@@ -73,7 +75,9 @@ public class ChatService {
             default -> throw new IllegalArgumentException("Unknown LLM");
         };
         chat.addMessage(response);
-        return new ChatDTO(chatRepository.save(chat), response);
+        Chat savedChat = chatRepository.save(chat);
+        applicationEventPublisher.publishEvent(new MessagesCreatedEvent(this, savedChat.getMessages()));
+        return new ChatDTO(savedChat, response);
     }
 
     // returns the chat if it belongs to the user, otherwise throws an exception

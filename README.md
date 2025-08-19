@@ -9,12 +9,13 @@ Core features include:
 - Token-based authentication (no refresh tokens for simplicity).
 - Create and manage chats: start new conversations, rename or delete existing ones.
 - Automatically generated chat titles: the app attempts to generate a title from the first message, with a fallback if the API call fails.
+- Full-text search and semantic search.
 
 ## Tchnologies
 
 Frontend: React, React Router
 
-Backend: the Spring framework (Spring Boot, Spring Web, Spring Security, Spring Data) 
+Backend: the Spring framework (Spring Boot, Spring Web, Spring Security, Spring Data), Hibernate Search & Apache Lucene 
 
 Database: MySQL
 

@@ -6,8 +6,10 @@ import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.LLModel;
 import com.example.backend.models.Message;
+import com.example.backend.repositories.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Limit;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import com.example.backend.repositories.ChatRepository;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @Service
 public class ChatService {
     private final ChatRepository chatRepository;
+    private final MessageRepository messageRepository;
     private final OpenAiService openAiService;
     private final GoogleAiService googleAiService;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -76,7 +79,9 @@ public class ChatService {
         };
         chat.addMessage(response);
         Chat savedChat = chatRepository.save(chat);
-        applicationEventPublisher.publishEvent(new MessagesCreatedEvent(this, savedChat.getMessages()));
+        // get the persisted messages
+        List<Message> lastTwoMessages = messageRepository.findByChatOrderByIdDesc(chat, Limit.of(2));
+        applicationEventPublisher.publishEvent(new MessagesCreatedEvent(this, lastTwoMessages));
         return new ChatDTO(savedChat, response);
     }
 

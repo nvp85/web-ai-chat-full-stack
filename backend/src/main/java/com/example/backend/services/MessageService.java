@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MessageService {
-    private final MessageRepository repo;
+    private final MessageRepository messageRepository;
     private final OpenAiService openAiService;
 
     @PersistenceContext private EntityManager entityManager;

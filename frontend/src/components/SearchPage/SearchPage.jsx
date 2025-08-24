@@ -5,6 +5,7 @@ import { NavLink } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import ErrorModal from "../Modal/ErrorModal";
 import { FaSpinner } from "react-icons/fa";
+import Markdown from 'react-markdown';
 
 
 export default function SearchPage() {
@@ -41,7 +42,7 @@ export default function SearchPage() {
         }
         return searchResult.map(m => <div key={m.message.id} className="search-result-item">
             <p>Chat: <NavLink to={`/chats/${m.chatId}`}>{m.chatTitle}</NavLink></p>
-            <p>{m.message.content}</p>
+            <p><Markdown>{m.message.content}</Markdown></p>
         </div>)
     }
 

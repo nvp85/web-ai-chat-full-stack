@@ -35,7 +35,6 @@ public class LuceneDataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws InterruptedException {
-        System.out.println("start...");
         if (!runBackfill) return;;
         List<Message> messages = messageRepository.findAll(Sort.by("id"));
         SearchSession searchSession = Search.session(entityManager);
@@ -51,7 +50,6 @@ public class LuceneDataInitializer implements CommandLineRunner {
         indexer.startAndWait();
         entityManager.flush();
         entityManager.clear();
-        System.out.println("finish");
     }
 
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @PreAuthorize("hasRole('ROLE_USER')")
 @RestController
@@ -43,7 +44,7 @@ public class ChatController {
     @ResponseStatus(HttpStatus.CREATED)
     public ChatDTO createChat(
             @AuthenticationPrincipal JwtUser jwtUser,
-            @RequestBody ChatDTO chatCreationDTO) throws ChatAlreadyExistsException, NotFoundException {
+            @RequestBody ChatDTO chatCreationDTO) throws ChatAlreadyExistsException, NotFoundException, ExecutionException, InterruptedException {
         // ChatCreationDTO contains the chat object and the first prompt
         if ((chatCreationDTO.getMessage() == null) ||
                 (chatCreationDTO.getMessage().getContent() == null) ||

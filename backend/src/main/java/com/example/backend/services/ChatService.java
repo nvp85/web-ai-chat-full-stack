@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 // This service contains the business logic for working with chats
 @RequiredArgsConstructor
@@ -38,29 +40,28 @@ public class ChatService {
     }
 
     // The method creates a new chat, adds the first prompt and response to it.
-    // It is one transaction with the isolation lvl serializable
-    // because otherwise it was possible to have several chat creation requests with the same id
-    // one after another and the last one got actually saved in the DB.
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ChatDTO createChat(Chat newChat, String firstPrompt) throws ChatAlreadyExistsException {
+    @Transactional
+    public ChatDTO createChat(Chat newChat, String firstPrompt) throws ChatAlreadyExistsException, ExecutionException, InterruptedException {
         if (chatRepository.existsById(newChat.getId())) {
             throw new ChatAlreadyExistsException();
         }
         newChat.setMessages(new ArrayList<Message>());
         Message firstMessage = new Message(firstPrompt, "user");
         newChat.addMessage(firstMessage);
-        Message response = switch (newChat.getLlModel().getId()) {
+        CompletableFuture<Message> response = CompletableFuture.supplyAsync(() -> switch (newChat.getLlModel().getId()) {
             case 1 -> openAiService.getResponse(newChat.getMessages());
             case 2 -> googleAiService.getResponse(newChat.getMessages());
             default -> throw new IllegalArgumentException("Unknown LLM");
-        };
-        newChat.addMessage(response);
+        });
+        CompletableFuture<String> title = CompletableFuture.supplyAsync(
+                () -> generateChatTitle(firstPrompt, newChat.getLlModel()));
+        CompletableFuture<Void> both = CompletableFuture.allOf(response, title);
+        both.join();
+        newChat.addMessage(response.get());
+        newChat.setTitle(title.get());
         Chat chat = chatRepository.save(newChat);
-        String title = generateChatTitle(firstPrompt, chat.getLlModel());
-        chat.setTitle(title);
-        chatRepository.save(chat);
         applicationEventPublisher.publishEvent(new MessagesCreatedEvent(this, chat.getMessages()));
-        return new ChatDTO(chat, response);
+        return new ChatDTO(chat, response.get());
     }
 
     public Chat getChatById(UUID chatId) throws NotFoundException{

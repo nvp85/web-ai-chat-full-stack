@@ -16,6 +16,7 @@ export default function AboutPage() {
                 <li>Create and manage chats: start new conversations, rename or delete existing ones.</li>
 
                 <li>Automatically generated chat titles: the app attempts to generate a title from the first message, with a fallback if the API call fails.</li>
+                <li>Search across the chats by keywords and meaning.</li>
             </ul> 
         </div >
     )

@@ -49,7 +49,7 @@ public class OpenAiService {
 
     public String generateTitle(String firstPrompt) {
         ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
-        b.addSystemMessage("Generate a concise title for the chat based on the user's messages.");
+        b.addSystemMessage("Generate a concise title for the chat based on the user's messages. Respond only with the title and nothing else.");
         b.addUserMessage(firstPrompt);
         ChatCompletionCreateParams params = b.build();
         String response = openAIClient.chat().completions().create(params).choices().get(0).message().content().get();

@@ -41,7 +41,7 @@ public class GoogleAiService {
     }
 
     public String generateTitle(String firstPrompt) {
-        Content instruction = Content.fromParts(Part.fromText("Generate a concise title for the user's message"));
+        Content instruction = Content.fromParts(Part.fromText("Generate a concise title for the user's message. Respond only with the title and nothing else."));
         GenerateContentConfig config = GenerateContentConfig.builder()
                 .systemInstruction(instruction)
                 .build();

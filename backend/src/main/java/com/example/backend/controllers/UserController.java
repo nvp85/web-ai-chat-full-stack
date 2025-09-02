@@ -38,7 +38,7 @@ public class UserController {
     // GET the current user's data
     // Endpoint http://localhost:8080/api/users/me
     @GetMapping("/me") // get current user's data
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public UserDTO getUser(@AuthenticationPrincipal JwtUser jwtUser) throws NotFoundException {
         User user = userService.getUserByEmail(jwtUser.getUsername());
         return new UserDTO(user.getUsername(), user.getEmail(), user.getChats());
@@ -47,7 +47,7 @@ public class UserController {
     // PUT (update) the current user's profile
     // Endpoint http://localhost:8080/api/users/me
     @PutMapping("/me")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProfile(@AuthenticationPrincipal JwtUser jwtUser,
                               @RequestBody User newProfile) throws EmailAlreadyExistsException, NotFoundException {

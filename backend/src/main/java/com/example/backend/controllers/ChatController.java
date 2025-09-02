@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-@PreAuthorize("hasRole('ROLE_USER')")
+@PreAuthorize("hasRole('USER')")
 @RestController
 @RequestMapping("/api/chats")
 public class ChatController {

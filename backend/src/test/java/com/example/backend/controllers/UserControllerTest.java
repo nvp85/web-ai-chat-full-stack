@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -103,16 +104,9 @@ class UserControllerTest {
     void getUser() throws Exception {
         when(userService.getUserByEmail("a@b.com"))
                 .thenReturn(expectedUser);
-
-        JwtUser jwtUser = new JwtUser();
-        jwtUser.setUsername(expectedUser.getEmail());
-        jwtUser.setPassword(expectedUser.getPassword());
-        jwtUser.setAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        jwtUser.setAccountNonExpired(true);
-        jwtUser.setAccountNonLocked(true);
-        jwtUser.setApiAccessAllowed(true);
-        jwtUser.setCredentialsNonExpired(true);
-        jwtUser.setEnabled(true);
+        JwtUser jwtUser = Mockito.mock(JwtUser.class);
+        when(jwtUser.getUsername()).thenReturn("a@b.com");
+        when(jwtUser.getAuthorities()).thenReturn(List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
         mockMvc.perform(
                         get("/api/users/me")

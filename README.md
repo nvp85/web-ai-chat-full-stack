@@ -67,7 +67,6 @@ Create a new user via UI.
 ## Unsolved problems or future features
 
 - Add one more LLM
-- A chat list search
 - Refresh tokens, so a user doesn't have to re-log in
 - Web UI color schemes
-
+- Hybrid search instead of two separate options

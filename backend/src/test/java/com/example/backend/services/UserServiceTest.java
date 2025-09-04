@@ -26,15 +26,17 @@ class UserServiceTest {
     @InjectMocks
     UserService userService;
 
+    private User user;
+
     @BeforeEach
     void setUp() {
+        user = new User();
+        user.setEmail("a@b.com");
+        user.setPassword("xS5!234567");
     }
 
     @Test
     void createUser() throws Exception {
-        User user = new User();
-        user.setEmail("a@b.com");
-        user.setPassword("xS5!234567");
         when(passwordEncoder.encode("xS5!234567")).thenReturn("hashedPassword");
         when(userRepository.findByEmail("a@b.com")).thenReturn(java.util.Optional.empty());
         userService.createUser(user);
@@ -44,9 +46,6 @@ class UserServiceTest {
 
     @Test
     void createUserEmailExists() throws Exception {
-        User user = new User();
-        user.setEmail("a@b.com");
-        user.setPassword("xS5!234567");
         when(userRepository.findByEmail("a@b.com")).thenReturn(java.util.Optional.of(user));
         assertThrows(EmailAlreadyExistsException.class, () -> {userService.createUser(user);});
         verify(userRepository, times(0)).save(user);
@@ -54,9 +53,6 @@ class UserServiceTest {
 
     @Test
     void updateUserProfile() throws Exception {
-        User user = new User();
-        user.setEmail("a@b.com");
-        user.setPassword("xS5!234567");
         User newProfile = new User();
         newProfile.setEmail("c@d.org");
         when(userRepository.findByEmail("c@d.org")).thenReturn(java.util.Optional.empty());
@@ -67,9 +63,7 @@ class UserServiceTest {
 
     @Test
     void updateUserEmailExists() throws Exception {
-        User user = new User();
         user.setId(1);
-        user.setEmail("a@b.com");
         User duplicate = new User();
         duplicate.setId(2);
         duplicate.setEmail("c@d.org");

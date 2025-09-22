@@ -24,7 +24,13 @@ jobs:
 
       - name: run tests with maven
         run: mvn -B test
-        
+
+      - name: publish test results
+        uses: dorny/test-reporter@v1
+        with:
+          name: JUnit Tests
+          path: backend/target/surefire-reports/*.xml
+          reporter: junit
 
           
 

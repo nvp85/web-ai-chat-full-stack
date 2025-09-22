@@ -1,0 +1,32 @@
+name: Run tests
+
+on: push
+
+defaults:
+  run:
+    working-directory: ./backend
+
+jobs:
+  test:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          cache: maven
+          distribution: 'temurin'
+
+      - name: run tests with maven
+        run: mvn -B test
+        
+
+          
+
+          
+    

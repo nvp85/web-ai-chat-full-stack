@@ -26,12 +26,13 @@ jobs:
         run: mvn -B test
 
       - name: publish test results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: JUnit Tests
           path: backend/target/surefire-reports/*.xml
-          reporter: junit
-
+          reporter: java-junit
+          use-actions-summary: true
+          list-tests: all
           
 
           

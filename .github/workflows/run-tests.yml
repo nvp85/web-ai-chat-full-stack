@@ -1,0 +1,39 @@
+name: Run tests
+
+on: push
+
+defaults:
+  run:
+    working-directory: ./backend
+
+jobs:
+  test:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          cache: maven
+          distribution: 'temurin'
+
+      - name: run tests with maven
+        run: mvn -B test
+
+      - name: publish test results
+        uses: dorny/test-reporter@v2
+        with:
+          name: JUnit Tests
+          path: backend/target/surefire-reports/*.xml
+          reporter: java-junit
+          use-actions-summary: true
+          list-tests: all
+          
+
+          
+    

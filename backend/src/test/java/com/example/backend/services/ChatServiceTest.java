@@ -20,8 +20,7 @@ import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ChatServiceTest {
@@ -70,6 +69,24 @@ class ChatServiceTest {
         // Verify the event was published
         ArgumentCaptor<MessagesCreatedEvent> captor = ArgumentCaptor.forClass(MessagesCreatedEvent.class);
         verify(applicationEventPublisher).publishEvent(captor.capture());
+    }
+
+    @Test
+    void createChatWithGemini() throws Exception {
+        Chat newChat = new Chat();
+        newChat.setId(java.util.UUID.randomUUID());
+        newChat.setLlModel(new LLModel(2, "gemini-flash", "Google"));
+        String firstPrompt = "Hello, Gemini!";
+        Message aiResponse = new Message("Hello, human!", "assistant", null);
+        when(chatRepository.existsById(newChat.getId())).thenReturn(false);
+        when(googleAiService.getResponse(anyList())).thenReturn(aiResponse);
+        when(googleAiService.generateTitle(firstPrompt)).thenReturn("Gemini Chat Title");
+        when(chatRepository.save(newChat)).thenAnswer(inv -> inv.getArgument(0));
+        ChatDTO dto = chatService.createChat(newChat, firstPrompt);
+        assertEquals("Hello, human!", dto.getMessage().getContent());
+        // the google service was used, not openai
+        verify(openAiService, never()).getResponse(anyList());
+        verify(googleAiService).getResponse(anyList());
     }
 
     @Test

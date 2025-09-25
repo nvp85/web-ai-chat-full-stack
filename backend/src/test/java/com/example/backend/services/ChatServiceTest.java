@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.concurrent.CompletionException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -100,6 +102,19 @@ class ChatServiceTest {
         verify(openAiService, never()).getResponse(anyList());
         verify(googleAiService, never()).getResponse(anyList());
         verify(applicationEventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void createChatUnknownLLM() {
+        Chat newChat = new Chat();
+        newChat.setId(java.util.UUID.randomUUID());
+        newChat.setLlModel(new LLModel(99, "unknown-model", "Unknown"));
+        String firstPrompt = "Hello, world!";
+        when(chatRepository.existsById(newChat.getId())).thenReturn(false);
+        CompletionException exception = assertThrows(CompletionException.class, () -> {
+            chatService.createChat(newChat, firstPrompt);});
+        assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+        assertEquals("Unknown LLM", exception.getCause().getMessage());
     }
 
     @Test

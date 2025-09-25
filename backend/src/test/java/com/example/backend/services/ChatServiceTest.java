@@ -16,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,6 +87,19 @@ class ChatServiceTest {
         // the google service was used, not openai
         verify(openAiService, never()).getResponse(anyList());
         verify(googleAiService).getResponse(anyList());
+    }
+
+    @Test
+    void createChatAlreadyExists() {
+        Chat newChat = new Chat();
+        newChat.setId(java.util.UUID.randomUUID());
+        String firstPrompt = "Hello, world!";
+        when(chatRepository.existsById(newChat.getId())).thenReturn(true);
+        assertThrows(Exception.class, () -> {chatService.createChat(newChat, firstPrompt);});
+        verify(chatRepository, never()).save(any(Chat.class));
+        verify(openAiService, never()).getResponse(anyList());
+        verify(googleAiService, never()).getResponse(anyList());
+        verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
     @Test

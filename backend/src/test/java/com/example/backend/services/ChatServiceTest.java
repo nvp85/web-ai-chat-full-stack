@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.ArrayList;
 import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -118,11 +119,41 @@ class ChatServiceTest {
     }
 
     @Test
-    void getChatById() {
+    void getChatById() throws Exception {
+        Chat chat = new Chat();
+        chat.setId(java.util.UUID.randomUUID());
+        when(chatRepository.findById(chat.getId())).thenReturn(java.util.Optional.of(chat));
+        Chat found = chatService.getChatById(chat.getId());
+        assertEquals(chat.getId(), found.getId());
     }
 
     @Test
-    void addPromptAndResponse() {
+    void getChatByIdNotFound() {
+        java.util.UUID chatId = java.util.UUID.randomUUID();
+        when(chatRepository.findById(chatId)).thenReturn(java.util.Optional.empty());
+        Exception exception = assertThrows(Exception.class, () -> {chatService.getChatById(chatId);});
+        assertEquals("Chat not found with ID: " + chatId, exception.getMessage());
+    }
+
+    @Test
+    void addPromptAndResponse() throws Exception {
+        Chat chat = new Chat();
+        chat.setId(java.util.UUID.randomUUID());
+        chat.setMessages(new ArrayList<Message>());
+        chat.setLlModel(new LLModel(1, "gpt-4o-mini", "OpenAI"));
+        Message prompt = new Message("What's the weather?", "user", null);
+        Message aiResponse = new Message("It's sunny!", "assistant", null);
+        when(openAiService.getResponse(anyList())).thenReturn(aiResponse);
+        when(chatRepository.save(chat)).thenAnswer(inv -> inv.getArgument(0));
+        ChatDTO dto = chatService.addPromptAndResponse(chat, prompt);
+        assertEquals("It's sunny!", dto.getMessage().getContent());
+        verify(chatRepository).save(argThat(savedChat ->
+                savedChat.getMessages().size() == 2 &&
+                savedChat.getMessages().get(0).getContent().equals("What's the weather?") &&
+                savedChat.getMessages().get(1).getContent().equals("It's sunny!")
+        ));
+        assertEquals(chat.getId(), dto.getChat().getId());
+        verify(applicationEventPublisher).publishEvent(any(MessagesCreatedEvent.class));
     }
 
     @Test

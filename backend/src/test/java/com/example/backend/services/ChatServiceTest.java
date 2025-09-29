@@ -5,6 +5,7 @@ import com.example.backend.Events.MessagesCreatedEvent;
 import com.example.backend.models.Chat;
 import com.example.backend.models.LLModel;
 import com.example.backend.models.Message;
+import com.example.backend.models.User;
 import com.example.backend.repositories.ChatRepository;
 import com.example.backend.repositories.MessageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,7 +124,7 @@ class ChatServiceTest {
     void getChatById() throws Exception {
         Chat chat = new Chat();
         chat.setId(java.util.UUID.randomUUID());
-        when(chatRepository.findById(chat.getId())).thenReturn(java.util.Optional.of(chat));
+        when(chatRepository.findById(chat.getId())).thenReturn(Optional.of(chat));
         Chat found = chatService.getChatById(chat.getId());
         assertEquals(chat.getId(), found.getId());
     }
@@ -130,7 +132,7 @@ class ChatServiceTest {
     @Test
     void getChatByIdNotFound() {
         java.util.UUID chatId = java.util.UUID.randomUUID();
-        when(chatRepository.findById(chatId)).thenReturn(java.util.Optional.empty());
+        when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
         Exception exception = assertThrows(Exception.class, () -> {chatService.getChatById(chatId);});
         assertEquals("Chat not found with ID: " + chatId, exception.getMessage());
     }
@@ -157,14 +159,58 @@ class ChatServiceTest {
     }
 
     @Test
-    void getChatOrThrow() {
+    void getChatOrThrow() throws Exception {
+        Chat chat = new Chat();
+        User user = new User();
+        chat.setId(java.util.UUID.randomUUID());
+        user.setEmail("a@b.com");
+        chat.setUser(user);
+        when(chatRepository.findById(chat.getId())).thenReturn(Optional.of(chat));
+        Chat found = chatService.getChatOrThrow(chat.getId(), "a@b.com");
+        assertEquals(chat.getId(), found.getId());
+    }
+
+    @Test
+    void getChatOrThrowAccessDenied() {
+        Chat chat = new Chat();
+        User user = new User();
+        chat.setId(java.util.UUID.randomUUID());
+        user.setEmail("a@b.com");
+        chat.setUser(user);
+        when(chatRepository.findById(chat.getId())).thenReturn(Optional.of(chat));
+        Exception exception = assertThrows(Exception.class, () -> {
+            chatService.getChatOrThrow(chat.getId(), "c@d.com");
+        });
+        assertEquals("You do not have permission to access this chat", exception.getMessage());
+    }
+
+    @Test
+    void getChatOrThrowNotFound() {
+        java.util.UUID chatId = java.util.UUID.randomUUID();
+        when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
+        Exception exception = assertThrows(Exception.class, () -> {
+            chatService.getChatOrThrow(chatId, "a@b.com");
+        });
+        assertEquals("Chat not found with ID: " + chatId, exception.getMessage());
     }
 
     @Test
     void updateChatTitle() {
+        Chat chat = new Chat();
+        chat.setId(java.util.UUID.randomUUID());
+        chat.setTitle("Old Title");
+        when(chatRepository.save(any(Chat.class))).thenAnswer(inv -> inv.getArgument(0));
+        Chat updated = chatService.updateChatTitle(chat, "New Title");
+        assertEquals("New Title", updated.getTitle());
+        verify(chatRepository).save(argThat(savedChat -> savedChat.getTitle().equals("New Title")));
     }
 
     @Test
     void deleteChat() {
+        Chat chat = new Chat();
+        chat.setId(java.util.UUID.randomUUID());
+        doNothing().when(chatRepository).deleteById(chat.getId());
+        chatService.deleteChat(chat);
+        verify(chatRepository).deleteById(chat.getId());
     }
 }

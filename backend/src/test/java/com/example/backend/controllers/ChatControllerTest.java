@@ -24,7 +24,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,7 +90,21 @@ class ChatControllerTest {
     }
 
     @Test
-    void getChatMessages() {
+    void getChatMessages() throws Exception {
+        JwtUser jwtUser = Mockito.mock(JwtUser.class);
+        when(jwtUser.getUsername()).thenReturn("a@b.com");
+        when(jwtUser.getAuthorities()).thenReturn(List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        Chat chat = new Chat();
+        chat.setId(java.util.UUID.fromString("d290f1ee-6c54-4b01-90e6-d701748f0851"));
+        chat.setTitle("Test Chat");
+        chat.setMessages(List.of(new Message("Hello, world!", "user")));
+        when(chatService.getChatOrThrow(chat.getId(), "a@b.com")).thenReturn(chat);
+        mockMvc.perform(
+                get("/api/chats/d290f1ee-6c54-4b01-90e6-d701748f0851/messages")
+                        .with(SecurityMockMvcRequestPostProcessors.user(jwtUser)
+                        ).contentType("application/json")
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].content").value("Hello, world!"));
     }
 
     @Test
@@ -120,5 +134,31 @@ class ChatControllerTest {
         ).andExpect(status().isCreated())
         .andExpect(jsonPath("$.chat.id").value("d290f1ee-6c54-4b01-90e6-d701748f0851"))
         .andExpect(jsonPath("$.message.content").value("Response"));
+    }
+
+    @Test
+    void promptAndGetResponseNoContent() throws Exception {
+        JwtUser jwtUser = Mockito.mock(JwtUser.class);
+        when(jwtUser.getUsername()).thenReturn("a@b.com");
+        when(jwtUser.getAuthorities()).thenReturn(List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        User user = new User();
+        user.setId(1);
+        user.setEmail("a@b.com");
+        Chat chat = new Chat();
+        chat.setId(java.util.UUID.fromString("d290f1ee-6c54-4b01-90e6-d701748f0851"));
+        when(userService.getUserByEmail("a@b.com")).thenReturn(user);
+        when(chatService.getChatOrThrow(chat.getId(), "a@b.com")).thenReturn(chat);
+        String newMessage = """
+                {
+                    "content": ""
+                }
+                """;
+        mockMvc.perform(
+                post("/api/chats/d290f1ee-6c54-4b01-90e6-d701748f0851/messages")
+                        .with(SecurityMockMvcRequestPostProcessors.user(jwtUser)
+                        ).contentType("application/json")
+                        .content(newMessage)
+        ).andExpect(status().isBadRequest())
+        .andExpect(result -> assertEquals("Prompt content must not be null or empty", result.getResolvedException().getMessage()));
     }
 }

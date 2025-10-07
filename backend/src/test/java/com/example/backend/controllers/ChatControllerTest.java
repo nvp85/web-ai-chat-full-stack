@@ -85,8 +85,32 @@ class ChatControllerTest {
     }
 
     @Test
-    void updateChatTitle() {
-
+    void updateChatTitle() throws Exception {
+        JwtUser jwtUser = Mockito.mock(JwtUser.class);
+        when(jwtUser.getUsername()).thenReturn("a@b.com");
+        when(jwtUser.getAuthorities()).thenReturn(List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        Chat chat = new Chat();
+        chat.setId(java.util.UUID.fromString("d290f1ee-6c54-4b01-90e6-d701748f0851"));
+        chat.setTitle("Test Chat");
+        when(chatService.getChatOrThrow(chat.getId(), "a@b.com")).thenReturn(chat);
+        when(chatService.updateChatTitle(Mockito.any(Chat.class), Mockito.anyString()))
+                .thenAnswer(i -> {
+                    Chat c = i.getArgument(0);
+                    c.setTitle(i.getArgument(1));
+                    return c;
+                });
+        String updatedChat = """
+                {
+                    "title": "Updated Title"
+                }
+                """;
+        mockMvc.perform(
+                put("/api/chats/d290f1ee-6c54-4b01-90e6-d701748f0851")
+                        .with(SecurityMockMvcRequestPostProcessors.user(jwtUser))
+                        .contentType("application/json")
+                        .content(updatedChat)
+        ).andExpect(status().isOk())
+        .andExpect(jsonPath("$.title").value("Updated Title"));
     }
 
     @Test

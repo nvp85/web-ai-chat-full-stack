@@ -14,13 +14,18 @@ import java.util.List;
 
 // This service is responsible for interaction with GPT via OpenAI SDK
 @Service
-public class OpenAiService {
+public class OpenAiService implements LlmService, EmbeddingsService {
     private final OpenAIClient openAIClient;
     private final ChatModel chatModel = ChatModel.GPT_4O_MINI;
     private final EmbeddingModel embeddingModel = EmbeddingModel.TEXT_EMBEDDING_3_SMALL;
 
     public OpenAiService(OpenAIClient openAIClient) {
         this.openAIClient = openAIClient;
+    }
+
+    @Override
+    public String provider() {
+        return "OpenAI";
     }
 
     // a helper method to create a builder of a chat history (it contains all the messages)
@@ -39,6 +44,7 @@ public class OpenAiService {
         return b; // return the builder to add more messages if needed
     }
 
+    @Override
     public Message getResponse(List<Message> messages) {
         String instruction = "You are a helpful assistant. Be succinct - answer in 3-5 sentences.";
         ChatCompletionCreateParams params = createParamsBuilder(messages, instruction).build();
@@ -47,6 +53,7 @@ public class OpenAiService {
         return new Message(response, "assistant", null);
     }
 
+    @Override
     public String generateTitle(String firstPrompt) {
         ChatCompletionCreateParams.Builder b = ChatCompletionCreateParams.builder().model(chatModel);
         b.addSystemMessage("Generate a concise title for the chat based on the user's messages. Respond only with the title and nothing else.");
@@ -56,6 +63,7 @@ public class OpenAiService {
         return response;
     }
 
+    @Override
     public List<float[]> embed(List<Message> messages) {
         EmbeddingCreateParams.Builder b = EmbeddingCreateParams.builder().model(embeddingModel);
         b.inputOfArrayOfStrings(messages.stream().map(Message::getContent).toList());

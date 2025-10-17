@@ -12,7 +12,7 @@ import java.util.List;
 
 // This service is responsible for interaction with Gemini via Google SDK
 @Service
-public class GoogleAiService {
+public class GoogleAiService implements LlmService {
 
     private final Client client;
     private final String model = "gemini-2.0-flash-001";
@@ -22,6 +22,12 @@ public class GoogleAiService {
         this.client = client;
     }
 
+    @Override
+    public String provider() {
+        return "Google";
+    }
+
+    @Override
     public Message getResponse(List<Message> messages) {
         // instruction goes separately from the chat history (in a json under the hood)
         Content instruction = Content.fromParts(Part.fromText("You are a helpful assistant. Be succinct - answer in 3-5 sentences."));
@@ -40,6 +46,7 @@ public class GoogleAiService {
         return new Message(response.text(), "model");
     }
 
+    @Override
     public String generateTitle(String firstPrompt) {
         Content instruction = Content.fromParts(Part.fromText("Generate a concise title for the user's message. Respond only with the title and nothing else."));
         GenerateContentConfig config = GenerateContentConfig.builder()

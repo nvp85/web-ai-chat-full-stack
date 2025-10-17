@@ -6,6 +6,7 @@ import com.example.backend.models.Chat;
 import com.example.backend.models.LLModel;
 import com.example.backend.models.Message;
 import com.example.backend.models.User;
+import com.example.backend.registries.LlmRegistry;
 import com.example.backend.repositories.ChatRepository;
 import com.example.backend.repositories.MessageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 
@@ -45,11 +47,16 @@ class ChatServiceTest {
     @Mock
     ApplicationEventPublisher applicationEventPublisher;
 
-    @InjectMocks
     ChatService chatService;
+
+    LlmRegistry llmRegistry;
 
     @BeforeEach
     void setUp() {
+        when(openAiService.provider()).thenReturn("OpenAI");
+        when(googleAiService.provider()).thenReturn("Google");
+        llmRegistry = new LlmRegistry(List.of(openAiService, googleAiService));
+        chatService = new ChatService(chatRepository, messageRepository, llmRegistry, applicationEventPublisher);
     }
 
     @Test
@@ -114,10 +121,9 @@ class ChatServiceTest {
         newChat.setLlModel(new LLModel(99, "unknown-model", "Unknown"));
         String firstPrompt = "Hello, world!";
         when(chatRepository.existsById(newChat.getId())).thenReturn(false);
-        CompletionException exception = assertThrows(CompletionException.class, () -> {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             chatService.createChat(newChat, firstPrompt);});
-        assertInstanceOf(IllegalArgumentException.class, exception.getCause());
-        assertEquals("Unknown LLM", exception.getCause().getMessage());
+        assertTrue(exception.getMessage().contains("Unknown LLM provider"));
     }
 
     @Test

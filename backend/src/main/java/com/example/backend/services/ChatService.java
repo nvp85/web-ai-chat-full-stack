@@ -6,6 +6,7 @@ import com.example.backend.exceptions.ChatAlreadyExistsException;
 import com.example.backend.exceptions.NotFoundException;
 import com.example.backend.models.LLModel;
 import com.example.backend.models.Message;
+import com.example.backend.registries.LlmRegistry;
 import com.example.backend.repositories.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,8 +31,7 @@ import java.util.concurrent.ExecutionException;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-    private final OpenAiService openAiService;
-    private final GoogleAiService googleAiService;
+    private final LlmRegistry llmRegistry;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     // returns all user's chats by user's email
@@ -48,11 +48,9 @@ public class ChatService {
         newChat.setMessages(new ArrayList<Message>());
         Message firstMessage = new Message(firstPrompt, "user");
         newChat.addMessage(firstMessage);
-        CompletableFuture<Message> response = CompletableFuture.supplyAsync(() -> switch (newChat.getLlModel().getId()) {
-            case 1 -> openAiService.getResponse(newChat.getMessages());
-            case 2 -> googleAiService.getResponse(newChat.getMessages());
-            default -> throw new IllegalArgumentException("Unknown LLM");
-        });
+        LlmService llmService = llmRegistry.getLlmService(newChat.getLlModel().getProvider());
+        CompletableFuture<Message> response = CompletableFuture.supplyAsync(
+                () -> llmService.getResponse(newChat.getMessages()));
         CompletableFuture<String> title = CompletableFuture.supplyAsync(
                 () -> generateChatTitle(firstPrompt, newChat.getLlModel()));
         CompletableFuture<Void> both = CompletableFuture.allOf(response, title);
@@ -73,11 +71,8 @@ public class ChatService {
     @Transactional
     public ChatDTO addPromptAndResponse(Chat chat, Message prompt) {
         chat.addMessage(prompt);
-        Message response = switch (chat.getLlModel().getId()) {
-            case 1 -> openAiService.getResponse(chat.getMessages());
-            case 2 -> googleAiService.getResponse(chat.getMessages());
-            default -> throw new IllegalArgumentException("Unknown LLM");
-        };
+        LlmService llmService = llmRegistry.getLlmService(chat.getLlModel().getProvider());
+        Message response = llmService.getResponse(chat.getMessages());
         chat.addMessage(response);
         Chat savedChat = chatRepository.save(chat);
         // get the persisted messages
@@ -109,12 +104,9 @@ public class ChatService {
     // if the call fails returns first 5 words of the first prompt as a title
     private String generateChatTitle(String firstPrompt, LLModel llm) {
         String title = "Untitled";
+        LlmService llmService = llmRegistry.getLlmService(llm.getProvider());
         try {
-            title = switch (llm.getId()) {
-                case 1 -> openAiService.generateTitle(firstPrompt);
-                case 2 -> googleAiService.generateTitle(firstPrompt);
-                default -> throw new IllegalArgumentException("Unknown LLM");
-            };
+            title = llmService.generateTitle(firstPrompt);
         } catch (Exception e) {
             String[] words = firstPrompt.trim().split("\\s+");
             // takes 5 first words as a title
